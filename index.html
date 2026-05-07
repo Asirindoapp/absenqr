@@ -36,8 +36,7 @@
   }
 
   .bg-pattern {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background-image:
       radial-gradient(circle at 20% 20%, rgba(37,99,235,0.15) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(16,164,74,0.08) 0%, transparent 50%);
@@ -46,77 +45,44 @@
 
   .page {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     padding: 1.5rem 1rem 3rem;
     position: relative;
   }
 
-  /* Header */
-  .header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    animation: fadeDown 0.5s ease both;
-  }
+  .header { text-align: center; margin-bottom: 1.5rem; animation: fadeDown 0.5s ease both; }
   .header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.85);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 100px;
-    margin-bottom: 0.75rem;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.85); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px;
+    border-radius: 100px; margin-bottom: 0.75rem;
   }
-  .header-badge span { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; display: inline-block; animation: pulse 2s infinite; }
+  .header-badge span { width:6px; height:6px; border-radius:50%; background:#4ade80; display:inline-block; animation: pulse 2s infinite; }
   .header h1 { font-size: 26px; font-weight: 600; color: #ffffff; line-height: 1.2; }
   .header p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; font-family: 'DM Mono', monospace; }
 
-  /* Clock */
   .clock-bar {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 12px;
-    padding: 10px 20px;
-    text-align: center;
-    margin-bottom: 1.25rem;
-    width: 100%;
-    max-width: 420px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px; padding: 10px 20px; text-align: center;
+    margin-bottom: 1.25rem; width: 100%; max-width: 420px;
     animation: fadeDown 0.5s 0.1s ease both;
   }
   .clock-time { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: #ffffff; letter-spacing: 0.05em; }
   .clock-date { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
 
-  /* Card */
   .card {
-    background: var(--white);
-    border-radius: 20px;
-    width: 100%;
-    max-width: 420px;
-    overflow: hidden;
+    background: var(--white); border-radius: 20px; width: 100%; max-width: 420px;
+    overflow: hidden; animation: fadeUp 0.5s 0.2s ease both;
     box-shadow: 0 25px 50px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05);
-    animation: fadeUp 0.5s 0.2s ease both;
   }
 
-  /* Status bar */
   .status-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 13px 18px;
-    font-size: 13px;
-    font-weight: 500;
-    border-bottom: 1px solid var(--gray-100);
-    transition: all 0.3s;
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 18px; font-size: 13px; font-weight: 500;
+    border-bottom: 1px solid var(--gray-100); transition: all 0.3s;
   }
-  .status-bar .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .status-bar .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
   .s-checking { background: var(--gray-50); color: var(--gray-600); }
   .s-checking .dot { background: var(--gray-400); animation: pulse 1.5s infinite; }
   .s-ok { background: var(--green-light); color: #15803d; }
@@ -126,163 +92,67 @@
   .s-warn { background: var(--amber-light); color: #92400e; }
   .s-warn .dot { background: var(--amber); }
 
-  /* Form body */
   .form-body { padding: 1.25rem 1.25rem 1.5rem; }
-
   .field { margin-bottom: 1rem; }
-  .field label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--gray-400);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    margin-bottom: 6px;
-  }
+  .field label { display:block; font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
 
   select {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1.5px solid var(--gray-200);
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--gray-800);
-    background: var(--white);
-    appearance: none;
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--gray-800);
+    background: var(--white); appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    cursor: pointer;
-    transition: border-color 0.2s;
+    background-repeat: no-repeat; background-position: right 14px center;
+    cursor: pointer; transition: border-color 0.2s;
   }
   select:focus { outline: none; border-color: var(--blue-accent); }
   select:disabled { background-color: var(--gray-50); color: var(--gray-400); cursor: not-allowed; }
 
   .ro-field {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 14px;
-    border: 1.5px solid var(--gray-100);
-    border-radius: 10px;
-    background: var(--gray-50);
-    font-size: 14px;
-    color: var(--gray-800);
-    min-height: 44px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border: 1.5px solid var(--gray-100); border-radius: 10px;
+    background: var(--gray-50); font-size: 14px; color: var(--gray-800); min-height: 44px;
   }
-  .ro-icon { font-size: 16px; flex-shrink: 0; }
   .ro-muted { color: var(--gray-400); font-style: italic; }
   .ro-sub { font-size: 11px; color: var(--gray-400); margin-top: 1px; font-family: 'DM Mono', monospace; }
 
   .badge-masuk {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--green-light);
-    color: #15803d;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 100px;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--green-light); color: #15803d;
+    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 100px;
   }
 
-  /* Submit button */
   .btn-submit {
-    width: 100%;
-    padding: 14px;
-    background: var(--blue-accent);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 1.25rem;
-    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    width: 100%; padding: 14px; background: var(--blue-accent); color: white;
+    border: none; border-radius: 12px; font-size: 15px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 1.25rem; transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
     box-shadow: 0 4px 14px rgba(37,99,235,0.35);
   }
   .btn-submit:hover:not(:disabled) { background: #1d4ed8; box-shadow: 0 6px 20px rgba(37,99,235,0.45); }
   .btn-submit:active:not(:disabled) { transform: scale(0.98); }
   .btn-submit:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; box-shadow: none; }
 
-  /* Spinner */
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: inline-block;
-  }
+  .spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
 
-  /* Notice */
-  .notice {
-    display: flex;
-    gap: 10px;
-    padding: 12px 14px;
-    background: var(--blue-light);
-    border-radius: 10px;
-    font-size: 12px;
-    color: #1e40af;
-    margin-top: 1rem;
-    line-height: 1.5;
-  }
-  .notice-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+  .notice { display:flex; gap:10px; padding:12px 14px; background:var(--blue-light); border-radius:10px; font-size:12px; color:#1e40af; margin-top:1rem; line-height:1.5; }
 
-  /* Success panel */
-  .success-panel {
-    padding: 2rem 1.5rem;
-    text-align: center;
-    display: none;
-  }
-  .success-circle {
-    width: 72px; height: 72px;
-    border-radius: 50%;
-    background: var(--green-light);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 34px;
-    margin: 0 auto 1rem;
-    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-  }
-  .success-name { font-size: 22px; font-weight: 600; color: var(--gray-800); }
-  .success-time { font-size: 13px; color: var(--gray-400); margin-top: 4px; font-family: 'DM Mono', monospace; }
+  .success-panel { padding: 2rem 1.5rem; text-align: center; display: none; }
+  .success-circle { width:72px; height:72px; border-radius:50%; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:34px; margin:0 auto 1rem; animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .success-name { font-size:22px; font-weight:600; color:var(--gray-800); }
+  .success-time { font-size:13px; color:var(--gray-400); margin-top:4px; font-family:'DM Mono',monospace; }
+  .success-divider { height:1px; background:var(--gray-100); margin:1.25rem 0; }
+  .detail-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; font-size:13px; border-bottom:1px dashed var(--gray-100); }
+  .detail-row:last-child { border-bottom:none; }
+  .detail-key { color:var(--gray-400); }
+  .detail-val { font-weight:500; color:var(--gray-800); }
+  .success-note { margin-top:1.25rem; font-size:12px; color:var(--gray-400); display:flex; align-items:center; justify-content:center; gap:5px; }
 
-  .success-divider { height: 1px; background: var(--gray-100); margin: 1.25rem 0; }
-
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 7px 0;
-    font-size: 13px;
-    border-bottom: 1px dashed var(--gray-100);
-  }
-  .detail-row:last-child { border-bottom: none; }
-  .detail-key { color: var(--gray-400); }
-  .detail-val { font-weight: 500; color: var(--gray-800); }
-
-  .success-note {
-    margin-top: 1.25rem;
-    font-size: 12px;
-    color: var(--gray-400);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-  }
-
-  /* Animations */
-  @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes popIn { from { opacity:0; transform:scale(0.5); } to { opacity:1; transform:scale(1); } }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 </style>
 </head>
 <body>
@@ -301,15 +171,12 @@
   </div>
 
   <div class="card">
-    <!-- Status Lokasi -->
     <div class="status-bar s-checking" id="geo-status">
       <div class="dot"></div>
       <span>Mendeteksi lokasi Anda...</span>
     </div>
 
-    <!-- Form -->
     <div class="form-body" id="form-body">
-
       <div class="field">
         <label>👤 Nama Karyawan</label>
         <select id="nama-select" disabled>
@@ -318,6 +185,13 @@
           <option value="Yulis">Yulis</option>
           <option value="Via">Via</option>
           <option value="Rahmania">Rahmania</option>
+          <option value="Rendi">Rendi</option>
+          <option value="Adisy">Adisy</option>
+          <option value="Desta">Desta</option>
+          <option value="Nia">Nia</option>
+          <option value="Tami">Tami</option>
+          <option value="Shanti">Shanti</option>
+          <option value="Chusnul">Chusnul</option>
         </select>
       </div>
 
@@ -331,14 +205,14 @@
       <div class="field">
         <label>🕐 Waktu Masuk</label>
         <div class="ro-field">
-          <span class="ro-icon">⏱</span>
+          <span>⏱</span>
           <span id="time-field">--:--:--</span>
         </div>
       </div>
 
       <div class="field">
         <label>📍 Lokasi</label>
-        <div class="ro-field" style="flex-direction: column; align-items: flex-start; gap: 3px;">
+        <div class="ro-field" style="flex-direction:column; align-items:flex-start; gap:3px;">
           <div id="loc-name" style="font-weight:500;">Mendeteksi GPS...</div>
           <div class="ro-sub" id="loc-coords"></div>
         </div>
@@ -356,12 +230,11 @@
       </button>
 
       <div class="notice">
-        <span class="notice-icon">🔒</span>
+        <span>🔒</span>
         <span>Absensi hanya bisa dilakukan dalam radius <strong>100 meter</strong> dari kantor. Lokasi di luar area akan diblokir otomatis.</span>
       </div>
     </div>
 
-    <!-- Success Panel -->
     <div class="success-panel" id="success-panel">
       <div class="success-circle">✓</div>
       <div class="success-name" id="s-nama"></div>
@@ -378,133 +251,130 @@
 </div>
 
 <script>
-  // =============================================
-  // KONFIGURASI — SESUAIKAN JIKA PERLU
-  // =============================================
-  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyjaskGn25-OARii0oismoh-UvehJljf3yDN4r-mvi9s_0Zzm4g4kiTxygwX7b4azF7/exec';
-  const OFFICE_LAT  = -6.2491795726354145;
-  const OFFICE_LNG  = 106.84304641349877;
-  const RADIUS_M    = 100;        // Radius area kantor dalam meter
-  const NAMA_KANTOR = 'Kantor Pusat';
+  var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyjaskGn25-OARii0oismoh-UvehJljf3yDN4r-mvi9s_0Zzm4g4kiTxygwX7b4azF7/exec';
+  var OFFICE_LAT  = -6.2491795726354145;
+  var OFFICE_LNG  = 106.84304641349877;
+  var RADIUS_M    = 100;
+  var NAMA_KANTOR = 'Kantor Pusat';
 
-  const DIVISI_MAP = {
+  var DIVISI_MAP = {
     'Yusran'  : 'Metadata & Content',
     'Yulis'   : 'Metadata & Content',
     'Via'     : 'Metadata & Content',
     'Rahmania': 'Performers',
-    'Rendi' : 'Lisensi',
-    'Adisy' : 'Legal',
-    'Desta' : 'Office Boy',
-    'Nia' : 'Office Girl',
-    'Tami' : 'Distribusi',
-    'Shanti' : 'IT',
+    'Rendi'   : 'Lisensi',
+    'Adisy'   : 'Legal',
+    'Desta'   : 'Office Boy',
+    'Nia'     : 'Office Girl',
+    'Tami'    : 'Distribusi',
+    'Shanti'  : 'IT',
     'Chusnul' : 'Accounting'
   };
-  // =============================================
 
-  let userLat = null, userLng = null, inRange = false;
+  var userLat = null, userLng = null, inRange = false;
 
   function pad(n) { return String(n).padStart(2,'0'); }
 
   function getNow() {
-    const d = new Date();
+    var d = new Date();
     return {
-      jam  : `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`,
+      jam  : pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
       tgl  : d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'}),
-      full : `${d.toLocaleDateString('id-ID')} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+      full : d.toLocaleDateString('id-ID')+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())
     };
   }
 
-  setInterval(() => {
-    const t = getNow();
+  function updateClock() {
+    var t = getNow();
     document.getElementById('jam-display').textContent = t.jam;
     document.getElementById('tanggal-display').textContent = t.tgl;
     document.getElementById('time-field').textContent = t.jam;
-  }, 1000);
-  (function(){ const t=getNow(); document.getElementById('jam-display').textContent=t.jam; document.getElementById('tanggal-display').textContent=t.tgl; document.getElementById('time-field').textContent=t.jam; })();
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
 
   function calcDist(lat1,lng1,lat2,lng2) {
-    const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
-    const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    var R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
     return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
   }
 
   function setStatus(type, msg) {
-    const el = document.getElementById('geo-status');
+    var el = document.getElementById('geo-status');
     el.className = 's-'+type+' status-bar';
-    el.innerHTML = `<div class="dot"></div><span>${msg}</span>`;
+    el.innerHTML = '<div class="dot"></div><span>'+msg+'</span>';
   }
 
   function updateBtn() {
-    document.getElementById('btn-absen').disabled = !(inRange && document.getElementById('nama-select').value !== '');
+    var nama = document.getElementById('nama-select').value;
+    document.getElementById('btn-absen').disabled = !(inRange && nama !== '');
   }
 
   if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(pos => {
-      userLat = pos.coords.latitude;
-      userLng = pos.coords.longitude;
-      const dist = Math.round(calcDist(userLat, userLng, OFFICE_LAT, OFFICE_LNG));
-      document.getElementById('loc-coords').textContent = `${userLat.toFixed(5)}, ${userLng.toFixed(5)}  ·  ${dist}m dari kantor`;
-
-      if (dist <= RADIUS_M) {
-        inRange = true;
-        setStatus('ok', `✓ Dalam area kantor — ${dist}m dari titik kantor`);
-        document.getElementById('loc-name').textContent = NAMA_KANTOR;
-        document.getElementById('nama-select').disabled = false;
-      } else {
-        inRange = false;
-        setStatus('err', `✗ Di luar area kantor (${dist}m) — Absensi diblokir`);
-        document.getElementById('loc-name').textContent = 'Di luar area kantor';
-        document.getElementById('nama-select').disabled = true;
-      }
-      updateBtn();
-    }, err => {
-      setStatus('warn', '⚠ Izinkan akses lokasi GPS untuk melanjutkan');
-      document.getElementById('loc-name').textContent = 'Izin lokasi diperlukan';
-    }, { enableHighAccuracy: true, maximumAge: 5000 });
+    navigator.geolocation.watchPosition(
+      function(pos) {
+        userLat = pos.coords.latitude;
+        userLng = pos.coords.longitude;
+        var dist = Math.round(calcDist(userLat, userLng, OFFICE_LAT, OFFICE_LNG));
+        document.getElementById('loc-coords').textContent = userLat.toFixed(5)+', '+userLng.toFixed(5)+'  ·  '+dist+'m dari kantor';
+        if (dist <= RADIUS_M) {
+          inRange = true;
+          setStatus('ok', '\u2713 Dalam area kantor \u2014 '+dist+'m dari titik kantor');
+          document.getElementById('loc-name').textContent = NAMA_KANTOR;
+          document.getElementById('nama-select').disabled = false;
+        } else {
+          inRange = false;
+          setStatus('err', '\u2717 Di luar area kantor ('+dist+'m) \u2014 Absensi diblokir');
+          document.getElementById('loc-name').textContent = 'Di luar area kantor';
+          document.getElementById('nama-select').disabled = true;
+        }
+        updateBtn();
+      },
+      function() {
+        setStatus('warn', '\u26A0 Izinkan akses lokasi GPS untuk melanjutkan');
+        document.getElementById('loc-name').textContent = 'Izin lokasi diperlukan';
+      },
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    );
   } else {
     setStatus('err', 'Browser tidak mendukung GPS');
   }
 
   document.getElementById('nama-select').addEventListener('change', function() {
-    const div = DIVISI_MAP[this.value] || '';
-    const el = document.getElementById('divisi-display');
-    el.innerHTML = div
-      ? `<strong style="color:#1e293b">${div}</strong>`
-      : `<span class="ro-muted">Otomatis dari nama</span>`;
+    var div = DIVISI_MAP[this.value] || '';
+    var el = document.getElementById('divisi-display');
+    el.innerHTML = div ? '<strong style="color:#1e293b">'+div+'</strong>' : '<span class="ro-muted">Otomatis dari nama</span>';
     updateBtn();
   });
 
-  document.getElementById('btn-absen').addEventListener('click', async function() {
-    if (!inRange || !document.getElementById('nama-select').value) return;
+  document.getElementById('btn-absen').addEventListener('click', function() {
+    var nama = document.getElementById('nama-select').value;
+    if (!inRange || !nama) return;
 
-    const nama   = document.getElementById('nama-select').value;
-    const divisi = DIVISI_MAP[nama];
-    const ts     = getNow().full;
-    const lat    = userLat.toFixed(6);
-    const lng    = userLng.toFixed(6);
+    var divisi = DIVISI_MAP[nama];
+    var ts  = getNow().full;
+    var lat = userLat.toFixed(6);
+    var lng = userLng.toFixed(6);
+    var btn = this;
 
-    this.innerHTML = '<span class="spinner"></span> Mengirim...';
-    this.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Mengirim...';
+    btn.disabled = true;
 
-    try {
-      await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ timestamp:ts, nama, divisi, lokasi:NAMA_KANTOR, latitude:lat, longitude:lng, status:'Masuk' })
-      });
-    } catch(e) { console.warn('Fetch error:', e); }
-
-    // Tampilkan success
-    document.getElementById('form-body').style.display = 'none';
-    const sp = document.getElementById('success-panel');
-    sp.style.display = 'block';
-    document.getElementById('s-nama').textContent = nama;
-    document.getElementById('s-time').textContent = ts;
-    document.getElementById('s-div').textContent  = divisi;
-    document.getElementById('s-loc').textContent  = NAMA_KANTOR;
-    document.getElementById('s-coords').textContent = `${lat}, ${lng}`;
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ timestamp:ts, nama:nama, divisi:divisi, lokasi:NAMA_KANTOR, latitude:lat, longitude:lng, status:'Masuk' })
+    }).catch(function(e){ console.warn(e); }).then(function() {
+      document.getElementById('form-body').style.display = 'none';
+      var sp = document.getElementById('success-panel');
+      sp.style.display = 'block';
+      document.getElementById('s-nama').textContent = nama;
+      document.getElementById('s-time').textContent = ts;
+      document.getElementById('s-div').textContent  = divisi;
+      document.getElementById('s-loc').textContent  = NAMA_KANTOR;
+      document.getElementById('s-coords').textContent = lat+', '+lng;
+    });
   });
 </script>
 </body>
