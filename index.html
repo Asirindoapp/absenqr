@@ -59,7 +59,6 @@
   .header-badge span { width:6px; height:6px; border-radius:50%; background:#4ade80; display:inline-block; animation: pulse 2s infinite; }
   .header h1 { font-size: 24px; font-weight: 600; color: #ffffff; line-height: 1.2; }
 
-  /* Clock — split tanggal & jam */
   .clock-wrap {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     width: 100%; max-width: 420px; margin-bottom: 1.25rem;
@@ -99,7 +98,6 @@
   .field { margin-bottom: 1rem; }
   .field label { display:block; font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
 
-  /* Two-column row for tanggal & jam */
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
 
   select {
@@ -128,6 +126,16 @@
     background: var(--green-light); color: #15803d;
     font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 100px;
   }
+
+  /* Closed banner */
+  .closed-banner {
+    display: none;
+    background: var(--red-light); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 1rem;
+    font-size: 13px; color: #b91c1c; font-weight: 500;
+    text-align: center; line-height: 1.5;
+  }
+  .closed-banner strong { display: block; font-size: 15px; margin-bottom: 3px; }
 
   .btn-submit {
     width: 100%; padding: 14px; background: var(--blue-accent); color: white;
@@ -174,7 +182,6 @@
     <h1>Absensi QR Kantor</h1>
   </div>
 
-  <!-- Tanggal & Jam dipisah -->
   <div class="clock-wrap">
     <div class="clock-box">
       <div class="clock-label">📅 Tanggal</div>
@@ -193,6 +200,13 @@
     </div>
 
     <div class="form-body" id="form-body">
+
+      <!-- Banner absensi ditutup (muncul setelah jam 18:00) -->
+      <div class="closed-banner" id="closed-banner">
+        <strong>🔒 Absensi Sudah Ditutup</strong>
+        Waktu absensi telah berakhir pada pukul 18:00 WIB.<br>
+        Karyawan yang belum absen akan dicatat otomatis sebagai <strong>Tidak Absen</strong>.
+      </div>
 
       <div class="field">
         <label>👤 Nama Karyawan</label>
@@ -219,7 +233,6 @@
         </div>
       </div>
 
-      <!-- Tanggal & Jam dipisah dalam form -->
       <div class="field-row">
         <div class="field" style="margin-bottom:0">
           <label>📅 Tanggal Masuk</label>
@@ -251,8 +264,8 @@
       </button>
 
       <div class="notice">
-        <span>🔒</span>
-        <span>Absensi hanya bisa dilakukan dalam radius <strong>100 meter</strong> dari kantor. Lokasi di luar area akan diblokir otomatis.</span>
+        🔒&nbsp;
+        <span>Absensi hanya bisa dilakukan dalam radius <strong>100 meter</strong> dari kantor dan sebelum pukul <strong>18:00 WIB</strong>. Lokasi di luar area atau melebihi waktu akan diblokir otomatis.</span>
       </div>
     </div>
 
@@ -275,11 +288,15 @@
 </div>
 
 <script>
+  // ============================================================
+  // KONFIGURASI — Sesuaikan bagian ini
+  // ============================================================
   var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyjaskGn25-OARii0oismoh-UvehJljf3yDN4r-mvi9s_0Zzm4g4kiTxygwX7b4azF7/exec';
   var OFFICE_LAT  = -6.2491795726354145;
   var OFFICE_LNG  = 106.84304641349877;
   var RADIUS_M    = 100;
   var NAMA_KANTOR = 'Kantor Pusat';
+  var JAM_TUTUP   = 18; // Jam tutup absensi (18 = pukul 18:00)
 
   var DIVISI_MAP = {
     'Yusran'  : 'Metadata & Content',
@@ -294,17 +311,32 @@
     'Shanti'  : 'IT',
     'Chusnul' : 'Accounting'
   };
+  // ============================================================
 
-  var userLat = null, userLng = null, inRange = false;
+  var userLat = null, userLng = null, inRange = false, isClosed = false;
 
-  function pad(n) { return String(n).padStart(2,'0'); }
+  function pad(n) { return String(n).padStart(2, '0'); }
 
   function getNow() {
     var d = new Date();
-    var jam = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
-    var tgl = d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'});
-    var tglLong = d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-    return { jam:jam, tgl:tgl, tglLong:tglLong };
+    var jam     = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    var tgl     = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+    var tglLong = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return { jam: jam, tgl: tgl, tglLong: tglLong, hours: d.getHours() };
+  }
+
+  // Cek apakah sudah melewati jam tutup
+  function checkClosingTime() {
+    var t = getNow();
+    if (t.hours >= JAM_TUTUP) {
+      isClosed = true;
+      document.getElementById('closed-banner').style.display = 'block';
+      document.getElementById('nama-select').disabled = true;
+      updateBtn();
+    } else {
+      isClosed = false;
+      document.getElementById('closed-banner').style.display = 'none';
+    }
   }
 
   function updateClock() {
@@ -313,48 +345,55 @@
     document.getElementById('tgl-display').textContent = t.tglLong;
     document.getElementById('form-jam').textContent = t.jam;
     document.getElementById('form-tgl').textContent = t.tgl;
+    checkClosingTime();
   }
   setInterval(updateClock, 1000);
   updateClock();
 
-  function calcDist(lat1,lng1,lat2,lng2) {
-    var R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
-    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
-    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  function calcDist(lat1, lng1, lat2, lng2) {
+    var R = 6371000, dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   function setStatus(type, msg) {
     var el = document.getElementById('geo-status');
-    el.className = 's-'+type+' status-bar';
-    el.innerHTML = '<div class="dot"></div><span>'+msg+'</span>';
+    el.className = 's-' + type + ' status-bar';
+    el.innerHTML = '<div class="dot"></div><span>' + msg + '</span>';
   }
 
   function updateBtn() {
-    document.getElementById('btn-absen').disabled = !(inRange && document.getElementById('nama-select').value !== '');
+    var nama = document.getElementById('nama-select').value;
+    document.getElementById('btn-absen').disabled = !(inRange && nama !== '' && !isClosed);
   }
 
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
-      function(pos) {
+      function (pos) {
         userLat = pos.coords.latitude;
         userLng = pos.coords.longitude;
         var dist = Math.round(calcDist(userLat, userLng, OFFICE_LAT, OFFICE_LNG));
-        document.getElementById('loc-coords').textContent = userLat.toFixed(5)+', '+userLng.toFixed(5)+'  ·  '+dist+'m dari kantor';
+        document.getElementById('loc-coords').textContent = userLat.toFixed(5) + ', ' + userLng.toFixed(5) + '  ·  ' + dist + 'm dari kantor';
+
         if (dist <= RADIUS_M) {
           inRange = true;
-          setStatus('ok', '\u2713 Dalam area kantor \u2014 '+dist+'m dari titik kantor');
+          if (!isClosed) {
+            setStatus('ok', '✓ Dalam area kantor — ' + dist + 'm dari titik kantor');
+          } else {
+            setStatus('warn', '⚠ Dalam area kantor — Absensi sudah ditutup pukul 18:00');
+          }
           document.getElementById('loc-name').textContent = NAMA_KANTOR;
-          document.getElementById('nama-select').disabled = false;
+          if (!isClosed) document.getElementById('nama-select').disabled = false;
         } else {
           inRange = false;
-          setStatus('err', '\u2717 Di luar area kantor ('+dist+'m) \u2014 Absensi diblokir');
+          setStatus('err', '✗ Di luar area kantor (' + dist + 'm) — Absensi diblokir');
           document.getElementById('loc-name').textContent = 'Di luar area kantor';
           document.getElementById('nama-select').disabled = true;
         }
         updateBtn();
       },
-      function() {
-        setStatus('warn', '\u26A0 Izinkan akses lokasi GPS untuk melanjutkan');
+      function () {
+        setStatus('warn', '⚠ Izinkan akses lokasi GPS untuk melanjutkan');
         document.getElementById('loc-name').textContent = 'Izin lokasi diperlukan';
       },
       { enableHighAccuracy: true, maximumAge: 5000 }
@@ -363,27 +402,28 @@
     setStatus('err', 'Browser tidak mendukung GPS');
   }
 
-  document.getElementById('nama-select').addEventListener('change', function() {
+  document.getElementById('nama-select').addEventListener('change', function () {
     var div = DIVISI_MAP[this.value] || '';
     var el = document.getElementById('divisi-display');
-    el.innerHTML = div ? '<strong style="color:#1e293b">'+div+'</strong>' : '<span class="ro-muted">Otomatis dari nama</span>';
+    el.innerHTML = div
+      ? '<strong style="color:#1e293b">' + div + '</strong>'
+      : '<span class="ro-muted">Otomatis dari nama</span>';
     updateBtn();
   });
 
-  document.getElementById('btn-absen').addEventListener('click', function() {
+  document.getElementById('btn-absen').addEventListener('click', function () {
     var nama = document.getElementById('nama-select').value;
-    if (!inRange || !nama) return;
+    if (!inRange || !nama || isClosed) return;
 
     var divisi = DIVISI_MAP[nama];
-    var t   = getNow();
-    var lat = userLat.toFixed(6);
-    var lng = userLng.toFixed(6);
-    var btn = this;
+    var t      = getNow();
+    var lat    = userLat.toFixed(6);
+    var lng    = userLng.toFixed(6);
+    var btn    = this;
 
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     btn.disabled = true;
 
-    // Kirim tanggal & jam sebagai kolom terpisah ke Google Sheets
     fetch(WEBHOOK_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -398,17 +438,17 @@
         longitude: lng,
         status   : 'Masuk'
       })
-    }).catch(function(e){ console.warn(e); }).then(function() {
+    }).catch(function (e) { console.warn(e); }).then(function () {
       document.getElementById('form-body').style.display = 'none';
       var sp = document.getElementById('success-panel');
       sp.style.display = 'block';
-      document.getElementById('s-nama').textContent  = nama;
-      document.getElementById('s-waktu').textContent = t.tglLong + ' · ' + t.jam;
-      document.getElementById('s-div').textContent   = divisi;
-      document.getElementById('s-tgl').textContent   = t.tgl;
-      document.getElementById('s-jam').textContent   = t.jam;
-      document.getElementById('s-loc').textContent   = NAMA_KANTOR;
-      document.getElementById('s-coords').textContent = lat+', '+lng;
+      document.getElementById('s-nama').textContent   = nama;
+      document.getElementById('s-waktu').textContent  = t.tglLong + ' · ' + t.jam;
+      document.getElementById('s-div').textContent    = divisi;
+      document.getElementById('s-tgl').textContent    = t.tgl;
+      document.getElementById('s-jam').textContent    = t.jam;
+      document.getElementById('s-loc').textContent    = NAMA_KANTOR;
+      document.getElementById('s-coords').textContent = lat + ', ' + lng;
     });
   });
 </script>
