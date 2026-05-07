@@ -9,8 +9,6 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --blue-dark: #0d2b4e;
-    --blue-mid: #1a4a8a;
     --blue-accent: #2563eb;
     --blue-light: #dbeafe;
     --green: #16a34a;
@@ -50,7 +48,7 @@
     position: relative;
   }
 
-  .header { text-align: center; margin-bottom: 1.5rem; animation: fadeDown 0.5s ease both; }
+  .header { text-align: center; margin-bottom: 1.25rem; animation: fadeDown 0.5s ease both; }
   .header-badge {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
@@ -59,17 +57,22 @@
     border-radius: 100px; margin-bottom: 0.75rem;
   }
   .header-badge span { width:6px; height:6px; border-radius:50%; background:#4ade80; display:inline-block; animation: pulse 2s infinite; }
-  .header h1 { font-size: 26px; font-weight: 600; color: #ffffff; line-height: 1.2; }
-  .header p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; font-family: 'DM Mono', monospace; }
+  .header h1 { font-size: 24px; font-weight: 600; color: #ffffff; line-height: 1.2; }
 
-  .clock-bar {
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 12px; padding: 10px 20px; text-align: center;
-    margin-bottom: 1.25rem; width: 100%; max-width: 420px;
+  /* Clock — split tanggal & jam */
+  .clock-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    width: 100%; max-width: 420px; margin-bottom: 1.25rem;
     animation: fadeDown 0.5s 0.1s ease both;
   }
-  .clock-time { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: #ffffff; letter-spacing: 0.05em; }
-  .clock-date { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .clock-box {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px; padding: 12px 14px; text-align: center;
+  }
+  .clock-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .clock-value { font-family: 'DM Mono', monospace; font-weight: 500; color: #ffffff; }
+  .clock-value.big { font-size: 22px; letter-spacing: 0.04em; }
+  .clock-value.med { font-size: 13px; }
 
   .card {
     background: var(--white); border-radius: 20px; width: 100%; max-width: 420px;
@@ -80,9 +83,9 @@
   .status-bar {
     display: flex; align-items: center; gap: 10px;
     padding: 13px 18px; font-size: 13px; font-weight: 500;
-    border-bottom: 1px solid var(--gray-100); transition: all 0.3s;
+    border-bottom: 1px solid var(--gray-100); transition: background 0.3s, color 0.3s;
   }
-  .status-bar .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .status-bar .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; transition: background 0.3s; }
   .s-checking { background: var(--gray-50); color: var(--gray-600); }
   .s-checking .dot { background: var(--gray-400); animation: pulse 1.5s infinite; }
   .s-ok { background: var(--green-light); color: #15803d; }
@@ -96,6 +99,9 @@
   .field { margin-bottom: 1rem; }
   .field label { display:block; font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
 
+  /* Two-column row for tanggal & jam */
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+
   select {
     width: 100%; padding: 11px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px;
     font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--gray-800);
@@ -108,11 +114,13 @@
   select:disabled { background-color: var(--gray-50); color: var(--gray-400); cursor: not-allowed; }
 
   .ro-field {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 14px; border: 1.5px solid var(--gray-100); border-radius: 10px;
-    background: var(--gray-50); font-size: 14px; color: var(--gray-800); min-height: 44px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 12px; border: 1.5px solid var(--gray-100); border-radius: 10px;
+    background: var(--gray-50); font-size: 13px; color: var(--gray-800); min-height: 44px;
+    font-family: 'DM Mono', monospace;
   }
-  .ro-muted { color: var(--gray-400); font-style: italic; }
+  .ro-field.full { font-family: 'DM Sans', sans-serif; font-size: 14px; }
+  .ro-muted { color: var(--gray-400); font-style: italic; font-family: 'DM Sans', sans-serif; font-size: 14px; }
   .ro-sub { font-size: 11px; color: var(--gray-400); margin-top: 1px; font-family: 'DM Mono', monospace; }
 
   .badge-masuk {
@@ -129,7 +137,7 @@
     margin-top: 1.25rem; transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
     box-shadow: 0 4px 14px rgba(37,99,235,0.35);
   }
-  .btn-submit:hover:not(:disabled) { background: #1d4ed8; box-shadow: 0 6px 20px rgba(37,99,235,0.45); }
+  .btn-submit:hover:not(:disabled) { background: #1d4ed8; }
   .btn-submit:active:not(:disabled) { transform: scale(0.98); }
   .btn-submit:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; box-shadow: none; }
 
@@ -137,15 +145,17 @@
 
   .notice { display:flex; gap:10px; padding:12px 14px; background:var(--blue-light); border-radius:10px; font-size:12px; color:#1e40af; margin-top:1rem; line-height:1.5; }
 
+  /* Success */
   .success-panel { padding: 2rem 1.5rem; text-align: center; display: none; }
   .success-circle { width:72px; height:72px; border-radius:50%; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:34px; margin:0 auto 1rem; animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
   .success-name { font-size:22px; font-weight:600; color:var(--gray-800); }
-  .success-time { font-size:13px; color:var(--gray-400); margin-top:4px; font-family:'DM Mono',monospace; }
+  .success-time { font-size:12px; color:var(--gray-400); margin-top:4px; font-family:'DM Mono',monospace; }
   .success-divider { height:1px; background:var(--gray-100); margin:1.25rem 0; }
   .detail-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; font-size:13px; border-bottom:1px dashed var(--gray-100); }
   .detail-row:last-child { border-bottom:none; }
   .detail-key { color:var(--gray-400); }
-  .detail-val { font-weight:500; color:var(--gray-800); }
+  .detail-val { font-weight:500; color:var(--gray-800); text-align:right; font-family:'DM Mono',monospace; font-size:12px; }
+  .detail-val.plain { font-family:'DM Sans',sans-serif; font-size:13px; }
   .success-note { margin-top:1.25rem; font-size:12px; color:var(--gray-400); display:flex; align-items:center; justify-content:center; gap:5px; }
 
   @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
@@ -162,12 +172,18 @@
   <div class="header">
     <div class="header-badge"><span></span> Sistem Absensi Aktif</div>
     <h1>Absensi QR Kantor</h1>
-    <p id="tanggal-display">Memuat tanggal...</p>
   </div>
 
-  <div class="clock-bar">
-    <div class="clock-time" id="jam-display">--:--:--</div>
-    <div class="clock-date">Waktu Absensi Real-time</div>
+  <!-- Tanggal & Jam dipisah -->
+  <div class="clock-wrap">
+    <div class="clock-box">
+      <div class="clock-label">📅 Tanggal</div>
+      <div class="clock-value med" id="tgl-display">--</div>
+    </div>
+    <div class="clock-box">
+      <div class="clock-label">🕐 Jam</div>
+      <div class="clock-value big" id="jam-display">--:--:--</div>
+    </div>
   </div>
 
   <div class="card">
@@ -177,6 +193,7 @@
     </div>
 
     <div class="form-body" id="form-body">
+
       <div class="field">
         <label>👤 Nama Karyawan</label>
         <select id="nama-select" disabled>
@@ -197,30 +214,34 @@
 
       <div class="field">
         <label>🏢 Divisi</label>
-        <div class="ro-field" id="divisi-display">
+        <div class="ro-field full" id="divisi-display">
           <span class="ro-muted">Otomatis dari nama</span>
         </div>
       </div>
 
-      <div class="field">
-        <label>🕐 Waktu Masuk</label>
-        <div class="ro-field">
-          <span>⏱</span>
-          <span id="time-field">--:--:--</span>
+      <!-- Tanggal & Jam dipisah dalam form -->
+      <div class="field-row">
+        <div class="field" style="margin-bottom:0">
+          <label>📅 Tanggal Masuk</label>
+          <div class="ro-field" id="form-tgl">--</div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>🕐 Jam Masuk</label>
+          <div class="ro-field" id="form-jam">--:--:--</div>
         </div>
       </div>
 
-      <div class="field">
+      <div class="field" style="margin-top:1rem;">
         <label>📍 Lokasi</label>
-        <div class="ro-field" style="flex-direction:column; align-items:flex-start; gap:3px;">
-          <div id="loc-name" style="font-weight:500;">Mendeteksi GPS...</div>
+        <div class="ro-field full" style="flex-direction:column; align-items:flex-start; gap:3px; min-height:52px;">
+          <div id="loc-name" style="font-weight:500; font-family:'DM Sans',sans-serif;">Mendeteksi GPS...</div>
           <div class="ro-sub" id="loc-coords"></div>
         </div>
       </div>
 
       <div class="field">
         <label>✅ Status</label>
-        <div class="ro-field">
+        <div class="ro-field full">
           <span class="badge-masuk">● Masuk</span>
         </div>
       </div>
@@ -235,15 +256,18 @@
       </div>
     </div>
 
+    <!-- Success Panel -->
     <div class="success-panel" id="success-panel">
       <div class="success-circle">✓</div>
       <div class="success-name" id="s-nama"></div>
-      <div class="success-time" id="s-time"></div>
+      <div class="success-time" id="s-waktu"></div>
       <div class="success-divider"></div>
-      <div class="detail-row"><span class="detail-key">Divisi</span><span class="detail-val" id="s-div"></span></div>
-      <div class="detail-row"><span class="detail-key">Lokasi</span><span class="detail-val" id="s-loc"></span></div>
-      <div class="detail-row"><span class="detail-key">Koordinat</span><span class="detail-val" id="s-coords" style="font-family:'DM Mono',monospace;font-size:11px;"></span></div>
-      <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val"><span class="badge-masuk">● Masuk</span></span></div>
+      <div class="detail-row"><span class="detail-key">Divisi</span><span class="detail-val plain" id="s-div"></span></div>
+      <div class="detail-row"><span class="detail-key">Tanggal</span><span class="detail-val" id="s-tgl"></span></div>
+      <div class="detail-row"><span class="detail-key">Jam Masuk</span><span class="detail-val" id="s-jam"></span></div>
+      <div class="detail-row"><span class="detail-key">Lokasi</span><span class="detail-val plain" id="s-loc"></span></div>
+      <div class="detail-row"><span class="detail-key">Koordinat</span><span class="detail-val" id="s-coords" style="font-size:11px;"></span></div>
+      <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val plain"><span class="badge-masuk">● Masuk</span></span></div>
       <div class="success-note">✅ Data berhasil tercatat di Google Sheets</div>
     </div>
   </div>
@@ -277,18 +301,18 @@
 
   function getNow() {
     var d = new Date();
-    return {
-      jam  : pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
-      tgl  : d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'}),
-      full : d.toLocaleDateString('id-ID')+' '+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())
-    };
+    var jam = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+    var tgl = d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'});
+    var tglLong = d.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    return { jam:jam, tgl:tgl, tglLong:tglLong };
   }
 
   function updateClock() {
     var t = getNow();
     document.getElementById('jam-display').textContent = t.jam;
-    document.getElementById('tanggal-display').textContent = t.tgl;
-    document.getElementById('time-field').textContent = t.jam;
+    document.getElementById('tgl-display').textContent = t.tglLong;
+    document.getElementById('form-jam').textContent = t.jam;
+    document.getElementById('form-tgl').textContent = t.tgl;
   }
   setInterval(updateClock, 1000);
   updateClock();
@@ -306,8 +330,7 @@
   }
 
   function updateBtn() {
-    var nama = document.getElementById('nama-select').value;
-    document.getElementById('btn-absen').disabled = !(inRange && nama !== '');
+    document.getElementById('btn-absen').disabled = !(inRange && document.getElementById('nama-select').value !== '');
   }
 
   if (navigator.geolocation) {
@@ -352,7 +375,7 @@
     if (!inRange || !nama) return;
 
     var divisi = DIVISI_MAP[nama];
-    var ts  = getNow().full;
+    var t   = getNow();
     var lat = userLat.toFixed(6);
     var lng = userLng.toFixed(6);
     var btn = this;
@@ -360,19 +383,31 @@
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     btn.disabled = true;
 
+    // Kirim tanggal & jam sebagai kolom terpisah ke Google Sheets
     fetch(WEBHOOK_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ timestamp:ts, nama:nama, divisi:divisi, lokasi:NAMA_KANTOR, latitude:lat, longitude:lng, status:'Masuk' })
+      body: JSON.stringify({
+        tanggal  : t.tgl,
+        jam      : t.jam,
+        nama     : nama,
+        divisi   : divisi,
+        lokasi   : NAMA_KANTOR,
+        latitude : lat,
+        longitude: lng,
+        status   : 'Masuk'
+      })
     }).catch(function(e){ console.warn(e); }).then(function() {
       document.getElementById('form-body').style.display = 'none';
       var sp = document.getElementById('success-panel');
       sp.style.display = 'block';
-      document.getElementById('s-nama').textContent = nama;
-      document.getElementById('s-time').textContent = ts;
-      document.getElementById('s-div').textContent  = divisi;
-      document.getElementById('s-loc').textContent  = NAMA_KANTOR;
+      document.getElementById('s-nama').textContent  = nama;
+      document.getElementById('s-waktu').textContent = t.tglLong + ' · ' + t.jam;
+      document.getElementById('s-div').textContent   = divisi;
+      document.getElementById('s-tgl').textContent   = t.tgl;
+      document.getElementById('s-jam').textContent   = t.jam;
+      document.getElementById('s-loc').textContent   = NAMA_KANTOR;
       document.getElementById('s-coords').textContent = lat+', '+lng;
     });
   });
