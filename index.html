@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Absensi QR — Kantor</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- FingerprintJS — Library untuk Device ID unik -->
+<script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -127,10 +129,26 @@
     font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 100px;
   }
 
+  /* Device blocked panel */
+  .blocked-panel {
+    display: none; padding: 2rem 1.5rem; text-align: center;
+  }
+  .blocked-circle {
+    width: 72px; height: 72px; border-radius: 50%; background: var(--red-light);
+    display: flex; align-items: center; justify-content: center; font-size: 34px;
+    margin: 0 auto 1rem; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  .blocked-title { font-size: 18px; font-weight: 600; color: var(--red); margin-bottom: 8px; }
+  .blocked-desc { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
+  .blocked-device {
+    margin-top: 1rem; padding: 10px 14px; background: var(--gray-50);
+    border-radius: 10px; font-size: 11px; color: var(--gray-400);
+    font-family: 'DM Mono', monospace; word-break: break-all;
+  }
+
   /* Closed banner */
   .closed-banner {
-    display: none;
-    background: var(--red-light); border-radius: 10px;
+    display: none; background: var(--red-light); border-radius: 10px;
     padding: 14px 16px; margin-bottom: 1rem;
     font-size: 13px; color: #b91c1c; font-weight: 500;
     text-align: center; line-height: 1.5;
@@ -152,6 +170,18 @@
   .spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
 
   .notice { display:flex; gap:10px; padding:12px 14px; background:var(--blue-light); border-radius:10px; font-size:12px; color:#1e40af; margin-top:1rem; line-height:1.5; }
+
+  /* Device ID badge */
+  .device-badge {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; background: var(--gray-50); border-radius: 8px;
+    margin-top: 0.75rem; border: 1px solid var(--gray-100);
+  }
+  .device-badge-icon { font-size: 14px; }
+  .device-badge-text { font-size: 11px; color: var(--gray-400); font-family: 'DM Mono', monospace; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .device-badge-status { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+  .device-ok { background: var(--green-light); color: #15803d; }
+  .device-checking { background: var(--amber-light); color: #92400e; }
 
   /* Success */
   .success-panel { padding: 2rem 1.5rem; text-align: center; display: none; }
@@ -199,9 +229,9 @@
       <span>Mendeteksi lokasi Anda...</span>
     </div>
 
+    <!-- Form utama -->
     <div class="form-body" id="form-body">
 
-      <!-- Banner absensi ditutup (muncul setelah jam 18:00) -->
       <div class="closed-banner" id="closed-banner">
         <strong>🔒 Absensi Sudah Ditutup</strong>
         Waktu absensi telah berakhir pada pukul 18:00 WIB.<br>
@@ -259,14 +289,35 @@
         </div>
       </div>
 
+      <!-- Device ID Badge -->
+      <div class="field">
+        <label>📱 Keamanan Perangkat</label>
+        <div class="device-badge">
+          <span class="device-badge-icon">🔐</span>
+          <span class="device-badge-text" id="device-id-text">Memuat device ID...</span>
+          <span class="device-badge-status device-checking" id="device-status-badge">Cek...</span>
+        </div>
+      </div>
+
       <button class="btn-submit" id="btn-absen" disabled>
         📋 Kirim Absensi
       </button>
 
       <div class="notice">
         🔒&nbsp;
-        <span>Absensi hanya bisa dilakukan dalam radius <strong>100 meter</strong> dari kantor dan sebelum pukul <strong>18:00 WIB</strong>. Lokasi di luar area atau melebihi waktu akan diblokir otomatis.</span>
+        <span>Absensi hanya bisa dilakukan dalam radius <strong>100 meter</strong> dari kantor, sebelum pukul <strong>18:00 WIB</strong>, dan <strong>1x per perangkat per hari</strong>. Titip absen tidak dapat dilakukan.</span>
       </div>
+    </div>
+
+    <!-- Panel: Device sudah absen hari ini -->
+    <div class="blocked-panel" id="blocked-panel">
+      <div class="blocked-circle">🚫</div>
+      <div class="blocked-title">Perangkat Sudah Digunakan</div>
+      <div class="blocked-desc">
+        Perangkat ini sudah digunakan untuk absen hari ini.<br>
+        Setiap perangkat hanya dapat melakukan <strong>1x absensi per hari</strong>.
+      </div>
+      <div class="blocked-device" id="blocked-device-id"></div>
     </div>
 
     <!-- Success Panel -->
@@ -289,14 +340,14 @@
 
 <script>
   // ============================================================
-  // KONFIGURASI — Sesuaikan bagian ini
+  // KONFIGURASI
   // ============================================================
   var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyjaskGn25-OARii0oismoh-UvehJljf3yDN4r-mvi9s_0Zzm4g4kiTxygwX7b4azF7/exec';
   var OFFICE_LAT  = -6.2491795726354145;
   var OFFICE_LNG  = 106.84304641349877;
   var RADIUS_M    = 100;
   var NAMA_KANTOR = 'Kantor Pusat';
-  var JAM_TUTUP   = 18; // Jam tutup absensi (18 = pukul 18:00)
+  var JAM_TUTUP   = 18;
 
   var DIVISI_MAP = {
     'Yusran'  : 'Metadata & Content',
@@ -314,6 +365,7 @@
   // ============================================================
 
   var userLat = null, userLng = null, inRange = false, isClosed = false;
+  var deviceId = null, deviceBlocked = false;
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -325,18 +377,17 @@
     return { jam: jam, tgl: tgl, tglLong: tglLong, hours: d.getHours() };
   }
 
-  // Cek apakah sudah melewati jam tutup
   function checkClosingTime() {
     var t = getNow();
     if (t.hours >= JAM_TUTUP) {
       isClosed = true;
       document.getElementById('closed-banner').style.display = 'block';
       document.getElementById('nama-select').disabled = true;
-      updateBtn();
     } else {
       isClosed = false;
       document.getElementById('closed-banner').style.display = 'none';
     }
+    updateBtn();
   }
 
   function updateClock() {
@@ -364,9 +415,101 @@
 
   function updateBtn() {
     var nama = document.getElementById('nama-select').value;
-    document.getElementById('btn-absen').disabled = !(inRange && nama !== '' && !isClosed);
+    document.getElementById('btn-absen').disabled = !(inRange && nama !== '' && !isClosed && !deviceBlocked && deviceId !== null);
   }
 
+  // ============================================================
+  // DEVICE FINGERPRINT — Generate Device ID unik per HP
+  // ============================================================
+  function initDeviceFingerprint() {
+    FingerprintJS.load().then(function(fp) {
+      return fp.get();
+    }).then(function(result) {
+      deviceId = result.visitorId;
+
+      // Tampilkan sebagian Device ID di UI (sensor untuk keamanan)
+      var shortId = deviceId.substring(0, 8) + '...' + deviceId.substring(deviceId.length - 4);
+      document.getElementById('device-id-text').textContent = 'ID: ' + shortId;
+
+      // Cek apakah device ini sudah absen hari ini via Google Sheets
+      cekDeviceHariIni(deviceId);
+
+    }).catch(function(err) {
+      console.warn('FingerprintJS error:', err);
+      // Fallback: buat device ID manual dari browser properties
+      deviceId = generateFallbackId();
+      var shortId = deviceId.substring(0, 8) + '...';
+      document.getElementById('device-id-text').textContent = 'ID: ' + shortId;
+      cekDeviceHariIni(deviceId);
+    });
+  }
+
+  // Fallback Device ID jika library gagal load
+  function generateFallbackId() {
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('DeviceID', 2, 2);
+    var raw = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width + 'x' + screen.height,
+      screen.colorDepth,
+      new Date().getTimezoneOffset(),
+      canvas.toDataURL()
+    ].join('|');
+    // Simple hash
+    var hash = 0;
+    for (var i = 0; i < raw.length; i++) {
+      hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).padStart(16, '0');
+  }
+
+  // Cek ke Google Sheets apakah device ini sudah absen hari ini
+  function cekDeviceHariIni(devId) {
+    var t = getNow();
+    var url = WEBHOOK_URL + '?action=cekDevice&deviceId=' + encodeURIComponent(devId) + '&tanggal=' + encodeURIComponent(t.tgl);
+
+    fetch(url)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.sudahAbsen) {
+          // Device sudah dipakai absen hari ini — blokir
+          deviceBlocked = true;
+          showBlockedPanel(devId, data.nama);
+        } else {
+          // Device belum absen — boleh lanjut
+          deviceBlocked = false;
+          document.getElementById('device-status-badge').textContent = 'Aman ✓';
+          document.getElementById('device-status-badge').className = 'device-badge-status device-ok';
+          updateBtn();
+        }
+      })
+      .catch(function() {
+        // Jika gagal cek (network error), tetap izinkan tapi catat warning
+        deviceBlocked = false;
+        document.getElementById('device-status-badge').textContent = 'Aman ✓';
+        document.getElementById('device-status-badge').className = 'device-badge-status device-ok';
+        updateBtn();
+      });
+  }
+
+  function showBlockedPanel(devId, namaYangAbsen) {
+    document.getElementById('form-body').style.display = 'none';
+    document.getElementById('blocked-panel').style.display = 'block';
+    var shortId = devId.substring(0, 8) + '...' + devId.substring(devId.length - 4);
+    var msg = 'Device ID: ' + shortId;
+    if (namaYangAbsen) msg += '\nSudah digunakan oleh: ' + namaYangAbsen;
+    document.getElementById('blocked-device-id').textContent = msg;
+    setStatus('err', '🚫 Perangkat ini sudah digunakan untuk absen hari ini');
+  }
+
+  // ============================================================
+  // GEOLOCATION
+  // ============================================================
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition(
       function (pos) {
@@ -383,7 +526,7 @@
             setStatus('warn', '⚠ Dalam area kantor — Absensi sudah ditutup pukul 18:00');
           }
           document.getElementById('loc-name').textContent = NAMA_KANTOR;
-          if (!isClosed) document.getElementById('nama-select').disabled = false;
+          if (!isClosed && !deviceBlocked) document.getElementById('nama-select').disabled = false;
         } else {
           inRange = false;
           setStatus('err', '✗ Di luar area kantor (' + dist + 'm) — Absensi diblokir');
@@ -411,9 +554,12 @@
     updateBtn();
   });
 
+  // ============================================================
+  // SUBMIT ABSENSI
+  // ============================================================
   document.getElementById('btn-absen').addEventListener('click', function () {
     var nama = document.getElementById('nama-select').value;
-    if (!inRange || !nama || isClosed) return;
+    if (!inRange || !nama || isClosed || deviceBlocked || !deviceId) return;
 
     var divisi = DIVISI_MAP[nama];
     var t      = getNow();
@@ -436,7 +582,8 @@
         lokasi   : NAMA_KANTOR,
         latitude : lat,
         longitude: lng,
-        status   : 'Masuk'
+        status   : 'Masuk',
+        deviceId : deviceId   // Device ID ikut dikirim ke Sheets
       })
     }).catch(function (e) { console.warn(e); }).then(function () {
       document.getElementById('form-body').style.display = 'none';
@@ -451,6 +598,9 @@
       document.getElementById('s-coords').textContent = lat + ', ' + lng;
     });
   });
+
+  // Inisialisasi device fingerprint saat halaman load
+  initDeviceFingerprint();
 </script>
 </body>
 </html>
