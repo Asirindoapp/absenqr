@@ -8,32 +8,21 @@
 <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --blue-accent: #2563eb;
-    --blue-light:  #dbeafe;
-    --green:       #16a34a;
-    --green-light: #dcfce7;
-    --red:         #dc2626;
-    --red-light:   #fee2e2;
-    --amber:       #d97706;
-    --amber-light: #fef3c7;
-    --gray-50:     #f8fafc;
-    --gray-100:    #f1f5f9;
-    --gray-200:    #e2e8f0;
-    --gray-400:    #94a3b8;
-    --gray-600:    #475569;
-    --gray-800:    #1e293b;
-    --white:       #ffffff;
+    --blue-accent: #2563eb; --blue-light: #dbeafe;
+    --green: #16a34a;       --green-light: #dcfce7;
+    --red: #dc2626;         --red-light: #fee2e2;
+    --amber: #d97706;       --amber-light: #fef3c7;
+    --gray-50: #f8fafc;     --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;    --gray-400: #94a3b8;
+    --gray-600: #475569;    --gray-800: #1e293b;
+    --white: #ffffff;
   }
-
   html, body {
     min-height: 100vh;
     background: linear-gradient(145deg, #0d2b4e 0%, #1a3a6e 50%, #0f3460 100%);
-    font-family: 'DM Sans', sans-serif;
-    color: var(--gray-800);
+    font-family: 'DM Sans', sans-serif; color: var(--gray-800);
   }
-
   .bg-pattern {
     position: fixed; inset: 0;
     background-image:
@@ -41,14 +30,11 @@
       radial-gradient(circle at 80% 80%, rgba(16,164,74,0.08) 0%, transparent 50%);
     pointer-events: none;
   }
-
   .page {
-    min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-    padding: 1.5rem 1rem 3rem;
-    position: relative;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 1.5rem 1rem 3rem; position: relative;
   }
-
   .header { text-align: center; margin-bottom: 1.25rem; animation: fadeDown 0.5s ease both; }
   .header-badge {
     display: inline-flex; align-items: center; gap: 6px;
@@ -58,8 +44,7 @@
     border-radius: 100px; margin-bottom: 0.75rem;
   }
   .header-badge span { width:6px; height:6px; border-radius:50%; background:#4ade80; display:inline-block; animation: pulse 2s infinite; }
-  .header h1 { font-size: 24px; font-weight: 600; color: #ffffff; line-height: 1.2; }
-
+  .header h1 { font-size: 24px; font-weight: 600; color: #fff; line-height: 1.2; }
   .clock-wrap {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     width: 100%; max-width: 420px; margin-bottom: 1.25rem;
@@ -70,136 +55,111 @@
     border-radius: 12px; padding: 12px 14px; text-align: center;
   }
   .clock-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-  .clock-value { font-family: 'DM Mono', monospace; font-weight: 500; color: #ffffff; }
+  .clock-value { font-family: 'DM Mono', monospace; font-weight: 500; color: #fff; }
   .clock-value.big { font-size: 22px; letter-spacing: 0.04em; }
   .clock-value.med { font-size: 13px; }
-
   .card {
     background: var(--white); border-radius: 20px; width: 100%; max-width: 420px;
     overflow: hidden; animation: fadeUp 0.5s 0.2s ease both;
     box-shadow: 0 25px 50px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05);
   }
-
   .status-bar {
     display: flex; align-items: center; gap: 10px;
     padding: 13px 18px; font-size: 13px; font-weight: 500;
     border-bottom: 1px solid var(--gray-100); transition: background 0.3s, color 0.3s;
   }
-  .status-bar .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; transition: background 0.3s; }
-  .s-checking { background: var(--gray-50); color: var(--gray-600); }
-  .s-checking .dot { background: var(--gray-400); animation: pulse 1.5s infinite; }
-  .s-ok  { background: var(--green-light); color: #15803d; }
-  .s-ok .dot  { background: var(--green); }
-  .s-err { background: var(--red-light);   color: #b91c1c; }
-  .s-err .dot { background: var(--red); }
-  .s-warn { background: var(--amber-light); color: #92400e; }
-  .s-warn .dot { background: var(--amber); }
-
+  .status-bar .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .s-checking { background:var(--gray-50); color:var(--gray-600); }
+  .s-checking .dot { background:var(--gray-400); animation: pulse 1.5s infinite; }
+  .s-ok  { background:var(--green-light); color:#15803d; }
+  .s-ok .dot  { background:var(--green); }
+  .s-err { background:var(--red-light); color:#b91c1c; }
+  .s-err .dot { background:var(--red); }
+  .s-warn { background:var(--amber-light); color:#92400e; }
+  .s-warn .dot { background:var(--amber); }
   .form-body { padding: 1.25rem 1.25rem 1.5rem; }
   .field { margin-bottom: 1rem; }
   .field label { display:block; font-size:11px; font-weight:600; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.07em; margin-bottom:6px; }
-
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-
   select {
-    width: 100%; padding: 11px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px;
-    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--gray-800);
-    background: var(--white); appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 14px center;
-    cursor: pointer; transition: border-color 0.2s;
+    width:100%; padding:11px 14px; border:1.5px solid var(--gray-200); border-radius:10px;
+    font-size:14px; font-family:'DM Sans',sans-serif; color:var(--gray-800);
+    background:var(--white); appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center;
+    cursor:pointer; transition:border-color 0.2s;
   }
-  select:focus { outline: none; border-color: var(--blue-accent); }
-  select:disabled { background-color: var(--gray-50); color: var(--gray-400); cursor: not-allowed; }
-
+  select:focus { outline:none; border-color:var(--blue-accent); }
+  select:disabled { background-color:var(--gray-50); color:var(--gray-400); cursor:not-allowed; }
   .ro-field {
-    display: flex; align-items: center; gap: 8px;
-    padding: 11px 12px; border: 1.5px solid var(--gray-100); border-radius: 10px;
-    background: var(--gray-50); font-size: 13px; color: var(--gray-800); min-height: 44px;
-    font-family: 'DM Mono', monospace;
+    display:flex; align-items:center; gap:8px;
+    padding:11px 12px; border:1.5px solid var(--gray-100); border-radius:10px;
+    background:var(--gray-50); font-size:13px; color:var(--gray-800); min-height:44px;
+    font-family:'DM Mono',monospace;
   }
-  .ro-field.full { font-family: 'DM Sans', sans-serif; font-size: 14px; }
-  .ro-muted { color: var(--gray-400); font-style: italic; font-family: 'DM Sans', sans-serif; font-size: 14px; }
-  .ro-sub   { font-size: 11px; color: var(--gray-400); margin-top: 1px; font-family: 'DM Mono', monospace; }
-
+  .ro-field.full { font-family:'DM Sans',sans-serif; font-size:14px; }
+  .ro-muted { color:var(--gray-400); font-style:italic; font-family:'DM Sans',sans-serif; font-size:14px; }
+  .ro-sub { font-size:11px; color:var(--gray-400); margin-top:1px; font-family:'DM Mono',monospace; }
   .badge-masuk {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: var(--green-light); color: #15803d;
-    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 100px;
+    display:inline-flex; align-items:center; gap:5px;
+    background:var(--green-light); color:#15803d;
+    font-size:12px; font-weight:600; padding:4px 10px; border-radius:100px;
   }
-
-  /* Info Banner */
   .info-banner {
-    display: none; border-radius: 10px;
-    padding: 14px 16px; margin-bottom: 1rem;
-    font-size: 13px; font-weight: 500;
-    text-align: center; line-height: 1.6;
+    display:none; border-radius:10px; padding:14px 16px; margin-bottom:1rem;
+    font-size:13px; font-weight:500; text-align:center; line-height:1.6;
   }
-  .info-banner strong { display: block; font-size: 15px; margin-bottom: 3px; }
-  .banner-holiday { background: #fef3c7; color: #92400e; border-left: 4px solid #d97706; }
-  .banner-closed  { background: var(--red-light); color: #b91c1c; border-left: 4px solid var(--red); }
-
-  /* Loading libur */
+  .info-banner strong { display:block; font-size:15px; margin-bottom:3px; }
+  .banner-holiday { background:#fef3c7; color:#92400e; border-left:4px solid #d97706; }
+  .banner-closed  { background:var(--red-light); color:#b91c1c; border-left:4px solid var(--red); }
   .libur-loading {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 14px; background: var(--gray-50); border-radius: 10px;
-    font-size: 12px; color: var(--gray-400); margin-bottom: 1rem;
+    display:flex; align-items:center; gap:8px;
+    padding:10px 14px; background:var(--gray-50); border-radius:10px;
+    font-size:12px; color:var(--gray-400); margin-bottom:1rem;
   }
-
-  /* Device blocked */
-  .blocked-panel { display: none; padding: 2rem 1.5rem; text-align: center; }
+  .blocked-panel { display:none; padding:2rem 1.5rem; text-align:center; }
   .blocked-circle {
-    width: 72px; height: 72px; border-radius: 50%; background: var(--red-light);
-    display: flex; align-items: center; justify-content: center; font-size: 34px;
-    margin: 0 auto 1rem; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    width:72px; height:72px; border-radius:50%; background:var(--red-light);
+    display:flex; align-items:center; justify-content:center; font-size:34px;
+    margin:0 auto 1rem; animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
   }
-  .blocked-title { font-size: 18px; font-weight: 600; color: var(--red); margin-bottom: 8px; }
-  .blocked-desc  { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
+  .blocked-title { font-size:18px; font-weight:600; color:var(--red); margin-bottom:8px; }
+  .blocked-desc  { font-size:13px; color:var(--gray-600); line-height:1.6; }
   .blocked-device {
-    margin-top: 1rem; padding: 10px 14px; background: var(--gray-50);
-    border-radius: 10px; font-size: 11px; color: var(--gray-400);
-    font-family: 'DM Mono', monospace; word-break: break-all;
-    white-space: pre-line;
+    margin-top:1rem; padding:10px 14px; background:var(--gray-50);
+    border-radius:10px; font-size:11px; color:var(--gray-400);
+    font-family:'DM Mono',monospace; word-break:break-all; white-space:pre-line;
   }
-
   .btn-submit {
-    width: 100%; padding: 14px; background: var(--blue-accent); color: white;
-    border: none; border-radius: 12px; font-size: 15px; font-weight: 600;
-    font-family: 'DM Sans', sans-serif; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-top: 1.25rem; transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+    width:100%; padding:14px; background:var(--blue-accent); color:white;
+    border:none; border-radius:12px; font-size:15px; font-weight:600;
+    font-family:'DM Sans',sans-serif; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin-top:1.25rem; transition:background 0.2s, transform 0.1s, box-shadow 0.2s;
+    box-shadow:0 4px 14px rgba(37,99,235,0.35);
   }
-  .btn-submit:hover:not(:disabled) { background: #1d4ed8; }
-  .btn-submit:active:not(:disabled) { transform: scale(0.98); }
-  .btn-submit:disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; box-shadow: none; }
-
+  .btn-submit:hover:not(:disabled) { background:#1d4ed8; }
+  .btn-submit:active:not(:disabled) { transform:scale(0.98); }
+  .btn-submit:disabled { background:var(--gray-200); color:var(--gray-400); cursor:not-allowed; box-shadow:none; }
   .spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
   .spinner-sm { width:12px; height:12px; border:2px solid var(--gray-200); border-top-color:var(--gray-400); border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; }
-
   .notice { display:flex; gap:10px; padding:12px 14px; background:var(--blue-light); border-radius:10px; font-size:12px; color:#1e40af; margin-top:1rem; line-height:1.5; }
-
-  /* Error banner untuk submit gagal */
   .submit-error {
-    display: none; margin-top: 0.75rem; padding: 12px 14px;
-    background: var(--red-light); border-radius: 10px;
-    font-size: 13px; color: #b91c1c; text-align: center; line-height: 1.5;
+    display:none; margin-top:0.75rem; padding:12px 14px;
+    background:var(--red-light); border-radius:10px;
+    font-size:13px; color:#b91c1c; text-align:center; line-height:1.5;
   }
-
   .device-badge {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 12px; background: var(--gray-50); border-radius: 8px;
-    margin-top: 0.75rem; border: 1px solid var(--gray-100);
+    display:flex; align-items:center; gap:8px;
+    padding:8px 12px; background:var(--gray-50); border-radius:8px;
+    margin-top:0.75rem; border:1px solid var(--gray-100);
   }
-  .device-badge-icon { font-size: 14px; }
-  .device-badge-text { font-size: 11px; color: var(--gray-400); font-family: 'DM Mono', monospace; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .device-badge-status { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
-  .device-ok       { background: var(--green-light); color: #15803d; }
-  .device-checking { background: var(--amber-light); color: #92400e; }
-  .device-err      { background: var(--red-light); color: #b91c1c; }
-
-  /* Success */
-  .success-panel { padding: 2rem 1.5rem; text-align: center; display: none; }
+  .device-badge-icon { font-size:14px; }
+  .device-badge-text { font-size:11px; color:var(--gray-400); font-family:'DM Mono',monospace; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .device-badge-status { font-size:10px; font-weight:600; padding:2px 8px; border-radius:100px; }
+  .device-ok       { background:var(--green-light); color:#15803d; }
+  .device-checking { background:var(--amber-light); color:#92400e; }
+  .success-panel { padding:2rem 1.5rem; text-align:center; display:none; }
   .success-circle { width:72px; height:72px; border-radius:50%; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:34px; margin:0 auto 1rem; animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
   .success-name { font-size:22px; font-weight:600; color:var(--gray-800); }
   .success-time { font-size:12px; color:var(--gray-400); margin-top:4px; font-family:'DM Mono',monospace; }
@@ -210,23 +170,20 @@
   .detail-val { font-weight:500; color:var(--gray-800); text-align:right; font-family:'DM Mono',monospace; font-size:12px; }
   .detail-val.plain { font-family:'DM Sans',sans-serif; font-size:13px; }
   .success-note { margin-top:1.25rem; font-size:12px; color:var(--gray-400); display:flex; align-items:center; justify-content:center; gap:5px; }
-
-  @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes fadeUp   { from { opacity:0; transform:translateY(20px);  } to { opacity:1; transform:translateY(0); } }
-  @keyframes popIn    { from { opacity:0; transform:scale(0.5); } to { opacity:1; transform:scale(1); } }
-  @keyframes spin     { to { transform:rotate(360deg); } }
-  @keyframes pulse    { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(20px)}  to{opacity:1;transform:translateY(0)} }
+  @keyframes popIn    { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+  @keyframes spin     { to{transform:rotate(360deg)} }
+  @keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.4} }
 </style>
 </head>
 <body>
 <div class="bg-pattern"></div>
 <div class="page">
-
   <div class="header">
     <div class="header-badge"><span></span> Sistem Absensi Aktif</div>
     <h1>Absensi QR Kantor</h1>
   </div>
-
   <div class="clock-wrap">
     <div class="clock-box">
       <div class="clock-label">📅 Tanggal</div>
@@ -237,32 +194,20 @@
       <div class="clock-value big" id="jam-display">--:--:--</div>
     </div>
   </div>
-
   <div class="card">
     <div class="status-bar s-checking" id="geo-status">
-      <div class="dot"></div>
-      <span>Mendeteksi lokasi Anda...</span>
+      <div class="dot"></div><span>Mendeteksi lokasi Anda...</span>
     </div>
-
-    <!-- Form utama -->
     <div class="form-body" id="form-body">
-
-      <!-- Loading saat ambil data libur -->
       <div class="libur-loading" id="libur-loading">
-        <span class="spinner-sm"></span>
-        <span>Memuat data hari libur...</span>
+        <span class="spinner-sm"></span><span>Memuat data hari libur...</span>
       </div>
-
-      <!-- Banner Hari Libur / Akhir Pekan -->
       <div class="info-banner banner-holiday" id="holiday-banner"></div>
-
-      <!-- Banner Tutup Jam 18:00 -->
       <div class="info-banner banner-closed" id="closed-banner">
         <strong>🔒 Absensi Sudah Ditutup</strong>
         Waktu absensi telah berakhir pada pukul 18:00 WIB.<br>
         Karyawan yang belum absen akan dicatat otomatis sebagai <strong>Tidak Absen</strong>.
       </div>
-
       <div class="field">
         <label>👤 Nama Karyawan</label>
         <select id="nama-select" disabled>
@@ -280,14 +225,12 @@
           <option value="Chusnul">Chusnul</option>
         </select>
       </div>
-
       <div class="field">
         <label>🏢 Divisi</label>
         <div class="ro-field full" id="divisi-display">
           <span class="ro-muted">Otomatis dari nama</span>
         </div>
       </div>
-
       <div class="field-row">
         <div class="field" style="margin-bottom:0">
           <label>📅 Tanggal Masuk</label>
@@ -298,22 +241,17 @@
           <div class="ro-field" id="form-jam">--:--:--</div>
         </div>
       </div>
-
       <div class="field" style="margin-top:1rem;">
         <label>📍 Lokasi</label>
-        <div class="ro-field full" style="flex-direction:column; align-items:flex-start; gap:3px; min-height:52px;">
-          <div id="loc-name" style="font-weight:500; font-family:'DM Sans',sans-serif;">Mendeteksi GPS...</div>
+        <div class="ro-field full" style="flex-direction:column;align-items:flex-start;gap:3px;min-height:52px;">
+          <div id="loc-name" style="font-weight:500;font-family:'DM Sans',sans-serif;">Mendeteksi GPS...</div>
           <div class="ro-sub" id="loc-coords"></div>
         </div>
       </div>
-
       <div class="field">
         <label>✅ Status</label>
-        <div class="ro-field full">
-          <span class="badge-masuk">● Masuk</span>
-        </div>
+        <div class="ro-field full"><span class="badge-masuk">● Masuk</span></div>
       </div>
-
       <div class="field">
         <label>📱 Keamanan Perangkat</label>
         <div class="device-badge">
@@ -322,21 +260,12 @@
           <span class="device-badge-status device-checking" id="device-status-badge">Cek...</span>
         </div>
       </div>
-
-      <button class="btn-submit" id="btn-absen" disabled>
-        📋 Kirim Absensi
-      </button>
-
-      <!-- Error message saat submit gagal (misal duplikat terdeteksi server) -->
+      <button class="btn-submit" id="btn-absen" disabled>📋 Kirim Absensi</button>
       <div class="submit-error" id="submit-error"></div>
-
       <div class="notice">
-        🔒&nbsp;
-        <span>Absensi hanya bisa dilakukan pada <strong>hari kerja (Senin–Jumat)</strong> dan bukan hari libur nasional, dalam radius <strong>100 meter</strong> dari kantor, sebelum pukul <strong>18:00 WIB</strong>, dan <strong>1x per perangkat per hari</strong>.</span>
+        🔒&nbsp;<span>Absensi hanya bisa dilakukan pada <strong>hari kerja (Senin–Jumat)</strong> dan bukan hari libur nasional, dalam radius <strong>100 meter</strong> dari kantor, sebelum pukul <strong>18:00 WIB</strong>, dan <strong>1x per perangkat per hari</strong>.</span>
       </div>
     </div>
-
-    <!-- Panel: Device sudah absen -->
     <div class="blocked-panel" id="blocked-panel">
       <div class="blocked-circle">🚫</div>
       <div class="blocked-title">Perangkat Sudah Digunakan</div>
@@ -346,8 +275,6 @@
       </div>
       <div class="blocked-device" id="blocked-device-id"></div>
     </div>
-
-    <!-- Success Panel -->
     <div class="success-panel" id="success-panel">
       <div class="success-circle">✓</div>
       <div class="success-name" id="s-nama"></div>
@@ -357,19 +284,19 @@
       <div class="detail-row"><span class="detail-key">Tanggal</span><span class="detail-val" id="s-tgl"></span></div>
       <div class="detail-row"><span class="detail-key">Jam Masuk</span><span class="detail-val" id="s-jam"></span></div>
       <div class="detail-row"><span class="detail-key">Lokasi</span><span class="detail-val plain" id="s-loc"></span></div>
-      <div class="detail-row"><span class="detail-key">Koordinat</span><span class="detail-val" id="s-coords" style="font-size:11px;"></span></div>
+      <div class="detail-row"><span class="detail-key">Koordinat</span><span class="detail-val" id="s-coords" style="font-size:11px"></span></div>
       <div class="detail-row"><span class="detail-key">Status</span><span class="detail-val plain"><span class="badge-masuk">● Masuk</span></span></div>
       <div class="success-note">✅ Data berhasil tercatat di Google Sheets</div>
     </div>
   </div>
-
 </div>
 
 <script>
   // ============================================================
-  // KONFIGURASI
+  // ⚠️  GANTI URL INI dengan URL deployment BARU dari Apps Script
   // ============================================================
-  var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyjaskGn25-OARii0oismoh-UvehJljf3yDN4r-mvi9s_0Zzm4g4kiTxygwX7b4azF7/exec';
+  var WEBHOOK_URL = 'GANTI_DENGAN_URL_DEPLOYMENT_BARU';
+
   var OFFICE_LAT  = -6.2491795726354145;
   var OFFICE_LNG  = 106.84304641349877;
   var RADIUS_M    = 100;
@@ -377,99 +304,71 @@
   var JAM_TUTUP   = 18;
 
   var DIVISI_MAP = {
-    'Yusran'  : 'Metadata & Content',
-    'Yulis'   : 'Metadata & Content',
-    'Via'     : 'Metadata & Content',
-    'Rahmania': 'Performers',
-    'Rendi'   : 'Lisensi',
-    'Adisy'   : 'Legal',
-    'Desta'   : 'Office Boy',
-    'Nia'     : 'Office Girl',
-    'Tami'    : 'Distribusi',
-    'Shanti'  : 'IT',
-    'Chusnul' : 'Accounting'
+    'Yusran':'Metadata & Content','Yulis':'Metadata & Content','Via':'Metadata & Content',
+    'Rahmania':'Performers','Rendi':'Lisensi','Adisy':'Legal',
+    'Desta':'Office Boy','Nia':'Office Girl','Tami':'Distribusi',
+    'Shanti':'IT','Chusnul':'Accounting'
   };
-  // ============================================================
 
-  // State
   var userLat = null, userLng = null;
   var inRange = false, isClosed = false, isHariLibur = false, liburLoaded = false;
-  var deviceId = null, deviceBlocked = false;
-  var isSubmitting = false; // ← Cegah double-click / double-submit
+  var deviceId = null, deviceBlocked = false, isSubmitting = false;
   var LIBUR_MAP = {};
 
-  function pad(n) { return String(n).padStart(2, '0'); }
+  function pad(n) { return String(n).padStart(2,'0'); }
 
   function getNow() {
-    var d    = new Date();
-    var jam  = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-    var tgl  = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
-    var tglLong = d.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-    return { jam, tgl, tglLong, hours: d.getHours(), day: d.getDay() };
+    var d = new Date();
+    return {
+      jam    : pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
+      tgl    : pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(),
+      tglLong: d.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}),
+      hours  : d.getHours(),
+      day    : d.getDay()
+    };
   }
 
-  // ============================================================
-  // FETCH DATA LIBUR DARI SERVER
-  // ============================================================
+  // ── Libur ────────────────────────────────────────────────
   function fetchHariLibur() {
-    var url = WEBHOOK_URL + '?action=getLibur';
-    fetch(url)
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.status === 'ok' && data.libur) {
-          LIBUR_MAP = data.libur;
-          console.log('✅ Data libur dimuat:', Object.keys(LIBUR_MAP).length, 'hari libur');
-        }
+    fetch(WEBHOOK_URL + '?action=getLibur')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d.status==='ok' && d.libur) LIBUR_MAP = d.libur;
         liburLoaded = true;
         document.getElementById('libur-loading').style.display = 'none';
         cekHariLibur();
       })
-      .catch(function(err) {
-        console.warn('⚠️ Gagal ambil data libur:', err);
+      .catch(function(){
         liburLoaded = true;
         document.getElementById('libur-loading').style.display = 'none';
         cekHariLibur();
       });
   }
 
-  // ============================================================
-  // CEK HARI LIBUR
-  // ============================================================
   function cekHariLibur() {
-    var t        = getNow();
-    var hari     = t.day;
-    var namaHari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][hari];
-    var banner   = document.getElementById('holiday-banner');
-
-    if (hari === 0 || hari === 6) {
-      isHariLibur = true;
-      banner.style.display = 'block';
-      banner.innerHTML = '<strong>🏖️ Hari Libur — ' + namaHari + '</strong>' +
-        'Absensi tidak dibuka pada hari ' + namaHari + '.<br>Selamat menikmati hari liburmu!';
-      document.getElementById('nama-select').disabled = true;
+    var t    = getNow();
+    var hari = t.day;
+    var nama = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][hari];
+    var el   = document.getElementById('holiday-banner');
+    if (hari===0||hari===6) {
+      isHariLibur = true; el.style.display='block';
+      el.innerHTML='<strong>🏖️ Hari Libur — '+nama+'</strong>Absensi tidak dibuka pada hari '+nama+'.<br>Selamat menikmati hari liburmu!';
+      document.getElementById('nama-select').disabled=true;
     } else if (LIBUR_MAP[t.tgl]) {
-      isHariLibur = true;
-      banner.style.display = 'block';
-      banner.innerHTML = '<strong>🎉 Libur Nasional</strong>' +
-        LIBUR_MAP[t.tgl] + '<br>Absensi tidak dibuka pada hari libur nasional.';
-      document.getElementById('nama-select').disabled = true;
+      isHariLibur = true; el.style.display='block';
+      el.innerHTML='<strong>🎉 Libur Nasional</strong>'+LIBUR_MAP[t.tgl]+'<br>Absensi tidak dibuka pada hari libur nasional.';
+      document.getElementById('nama-select').disabled=true;
     } else {
-      isHariLibur = false;
-      banner.style.display = 'none';
+      isHariLibur = false; el.style.display='none';
     }
     updateBtn();
   }
 
   function checkClosingTime() {
     var t = getNow();
-    if (t.hours >= JAM_TUTUP) {
-      isClosed = true;
-      document.getElementById('closed-banner').style.display = 'block';
-      document.getElementById('nama-select').disabled = true;
-    } else {
-      isClosed = false;
-      if (!isHariLibur) document.getElementById('closed-banner').style.display = 'none';
-    }
+    isClosed = t.hours >= JAM_TUTUP;
+    document.getElementById('closed-banner').style.display = isClosed ? 'block' : 'none';
+    if (isClosed) document.getElementById('nama-select').disabled = true;
     updateBtn();
   }
 
@@ -481,84 +380,98 @@
     document.getElementById('form-tgl').textContent    = t.tgl;
     checkClosingTime();
   }
-  setInterval(updateClock, 1000);
-  updateClock();
+  setInterval(updateClock, 1000); updateClock();
 
-  function calcDist(lat1, lng1, lat2, lng2) {
-    var R = 6371000;
-    var dLat = (lat2 - lat1) * Math.PI / 180;
-    var dLng = (lng2 - lng1) * Math.PI / 180;
-    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-            Math.sin(dLng/2) * Math.sin(dLng/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  // ── GPS ──────────────────────────────────────────────────
+  function calcDist(lat1,lng1,lat2,lng2) {
+    var R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
   }
 
   function setStatus(type, msg) {
     var el = document.getElementById('geo-status');
-    el.className = 's-' + type + ' status-bar';
-    el.innerHTML = '<div class="dot"></div><span>' + msg + '</span>';
+    el.className = 's-'+type+' status-bar';
+    el.innerHTML = '<div class="dot"></div><span>'+msg+'</span>';
   }
 
   function updateBtn() {
     var nama = document.getElementById('nama-select').value;
-    var ok   = inRange && nama !== '' && !isClosed && !isHariLibur
-               && !deviceBlocked && deviceId !== null && liburLoaded && !isSubmitting;
+    var ok = inRange && nama!=='' && !isClosed && !isHariLibur && !deviceBlocked && deviceId!==null && liburLoaded && !isSubmitting;
     document.getElementById('btn-absen').disabled = !ok;
   }
 
-  // ============================================================
-  // DEVICE FINGERPRINT
-  // ============================================================
+  if (navigator.geolocation) {
+    navigator.geolocation.watchPosition(function(pos) {
+      userLat = pos.coords.latitude; userLng = pos.coords.longitude;
+      var dist = Math.round(calcDist(userLat,userLng,OFFICE_LAT,OFFICE_LNG));
+      document.getElementById('loc-coords').textContent = userLat.toFixed(5)+', '+userLng.toFixed(5)+'  ·  '+dist+'m dari kantor';
+      if (dist<=RADIUS_M) {
+        inRange = true;
+        document.getElementById('loc-name').textContent = NAMA_KANTOR;
+        if (!isClosed&&!isHariLibur&&!deviceBlocked) document.getElementById('nama-select').disabled=false;
+        setStatus(isHariLibur?'warn':isClosed?'warn':'ok',
+          isHariLibur?'⚠ Dalam area — Hari libur':isClosed?'⚠ Dalam area — Absensi ditutup 18:00':'✓ Dalam area kantor — '+dist+'m dari titik kantor');
+      } else {
+        inRange = false;
+        document.getElementById('loc-name').textContent = 'Di luar area kantor';
+        document.getElementById('nama-select').disabled = true;
+        setStatus('err','✗ Di luar area kantor ('+dist+'m) — Absensi diblokir');
+      }
+      updateBtn();
+    }, function() {
+      setStatus('warn','⚠ Izinkan akses lokasi GPS untuk melanjutkan');
+      document.getElementById('loc-name').textContent='Izin lokasi diperlukan';
+    }, { enableHighAccuracy:true, maximumAge:5000 });
+  }
+
+  // ── Device Fingerprint ───────────────────────────────────
   function initDeviceFingerprint() {
     FingerprintJS.load()
-      .then(function(fp) { return fp.get(); })
-      .then(function(result) {
-        deviceId = result.visitorId;
-        var shortId = deviceId.substring(0,8) + '...' + deviceId.substring(deviceId.length-4);
-        document.getElementById('device-id-text').textContent = 'ID: ' + shortId;
+      .then(function(fp){ return fp.get(); })
+      .then(function(r){
+        deviceId = r.visitorId;
+        showDeviceId(deviceId);
         cekDeviceHariIni(deviceId);
       })
-      .catch(function() {
+      .catch(function(){
         deviceId = generateFallbackId();
-        var shortId = deviceId.substring(0,8) + '...';
-        document.getElementById('device-id-text').textContent = 'ID: ' + shortId;
+        showDeviceId(deviceId);
         cekDeviceHariIni(deviceId);
       });
   }
 
+  function showDeviceId(id) {
+    document.getElementById('device-id-text').textContent = 'ID: '+id.substring(0,8)+'...'+id.substring(id.length-4);
+  }
+
   function generateFallbackId() {
-    var canvas = document.createElement('canvas');
-    var ctx    = canvas.getContext('2d');
-    ctx.textBaseline = 'top'; ctx.font = '14px Arial';
-    ctx.fillText('DeviceID', 2, 2);
-    var raw = [navigator.userAgent, navigator.language,
-               screen.width + 'x' + screen.height, screen.colorDepth,
-               new Date().getTimezoneOffset(), canvas.toDataURL()].join('|');
-    var hash = 0;
-    for (var i = 0; i < raw.length; i++) { hash = ((hash << 5) - hash) + raw.charCodeAt(i); hash |= 0; }
-    return Math.abs(hash).toString(16).padStart(16, '0');
+    var canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+    ctx.textBaseline='top'; ctx.font='14px Arial'; ctx.fillText('DeviceID',2,2);
+    var raw = [navigator.userAgent,navigator.language,screen.width+'x'+screen.height,
+               screen.colorDepth,new Date().getTimezoneOffset(),canvas.toDataURL()].join('|');
+    var hash=0;
+    for(var i=0;i<raw.length;i++){hash=((hash<<5)-hash)+raw.charCodeAt(i);hash|=0;}
+    return Math.abs(hash).toString(16).padStart(16,'0');
   }
 
   function cekDeviceHariIni(devId) {
-    var t   = getNow();
-    var url = WEBHOOK_URL + '?action=cekDevice&deviceId=' + encodeURIComponent(devId) + '&tanggal=' + encodeURIComponent(t.tgl);
+    var t = getNow();
+    var url = WEBHOOK_URL+'?action=cekDevice&deviceId='+encodeURIComponent(devId)+'&tanggal='+encodeURIComponent(t.tgl);
     fetch(url)
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.sudahAbsen) {
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d.sudahAbsen) {
           deviceBlocked = true;
-          showBlockedPanel(devId, data.nama);
+          showBlockedPanel(devId, d.nama);
         } else {
-          deviceBlocked = false;
           document.getElementById('device-status-badge').textContent = 'Aman ✓';
           document.getElementById('device-status-badge').className   = 'device-badge-status device-ok';
           updateBtn();
         }
       })
-      .catch(function() {
-        // Kalau cek gagal (jaringan down), tetap izinkan tapi server akan validasi ulang saat submit
-        deviceBlocked = false;
+      .catch(function(){
+        // Jaringan down — izinkan lanjut, server akan validasi ulang saat submit
         document.getElementById('device-status-badge').textContent = 'Cek saat kirim';
         document.getElementById('device-status-badge').className   = 'device-badge-status device-checking';
         updateBtn();
@@ -568,74 +481,26 @@
   function showBlockedPanel(devId, namaYangAbsen) {
     document.getElementById('form-body').style.display    = 'none';
     document.getElementById('blocked-panel').style.display = 'block';
-    var shortId = devId.substring(0,8) + '...' + devId.substring(devId.length-4);
-    var msg = 'Device ID: ' + shortId;
-    if (namaYangAbsen) msg += '\nSudah digunakan oleh: ' + namaYangAbsen;
+    var msg = 'Device ID: '+devId.substring(0,8)+'...'+devId.substring(devId.length-4);
+    if (namaYangAbsen) msg += '\nSudah digunakan oleh: '+namaYangAbsen;
     document.getElementById('blocked-device-id').textContent = msg;
-    setStatus('err', '🚫 Perangkat ini sudah digunakan untuk absen hari ini');
-  }
-
-  // ============================================================
-  // GEOLOCATION
-  // ============================================================
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(
-      function(pos) {
-        userLat = pos.coords.latitude;
-        userLng = pos.coords.longitude;
-        var dist = Math.round(calcDist(userLat, userLng, OFFICE_LAT, OFFICE_LNG));
-        document.getElementById('loc-coords').textContent =
-          userLat.toFixed(5) + ', ' + userLng.toFixed(5) + '  ·  ' + dist + 'm dari kantor';
-
-        if (dist <= RADIUS_M) {
-          inRange = true;
-          if (isHariLibur) {
-            setStatus('warn', '⚠ Dalam area kantor — Hari ini libur, absensi ditutup');
-          } else if (isClosed) {
-            setStatus('warn', '⚠ Dalam area kantor — Absensi sudah ditutup pukul 18:00');
-          } else {
-            setStatus('ok', '✓ Dalam area kantor — ' + dist + 'm dari titik kantor');
-          }
-          document.getElementById('loc-name').textContent = NAMA_KANTOR;
-          if (!isClosed && !isHariLibur && !deviceBlocked) {
-            document.getElementById('nama-select').disabled = false;
-          }
-        } else {
-          inRange = false;
-          setStatus('err', '✗ Di luar area kantor (' + dist + 'm) — Absensi diblokir');
-          document.getElementById('loc-name').textContent = 'Di luar area kantor';
-          document.getElementById('nama-select').disabled = true;
-        }
-        updateBtn();
-      },
-      function() {
-        setStatus('warn', '⚠ Izinkan akses lokasi GPS untuk melanjutkan');
-        document.getElementById('loc-name').textContent = 'Izin lokasi diperlukan';
-      },
-      { enableHighAccuracy: true, maximumAge: 5000 }
-    );
-  } else {
-    setStatus('err', 'Browser tidak mendukung GPS');
+    setStatus('err','🚫 Perangkat ini sudah digunakan untuk absen hari ini');
   }
 
   document.getElementById('nama-select').addEventListener('change', function() {
-    var div = DIVISI_MAP[this.value] || '';
-    var el  = document.getElementById('divisi-display');
-    el.innerHTML = div
-      ? '<strong style="color:#1e293b">' + div + '</strong>'
+    var div = DIVISI_MAP[this.value]||'';
+    document.getElementById('divisi-display').innerHTML = div
+      ? '<strong style="color:#1e293b">'+div+'</strong>'
       : '<span class="ro-muted">Otomatis dari nama</span>';
-    // Sembunyikan error lama saat ganti nama
-    document.getElementById('submit-error').style.display = 'none';
+    document.getElementById('submit-error').style.display='none';
     updateBtn();
   });
 
-  // ============================================================
-  // SUBMIT — Sekarang menunggu konfirmasi server
-  // ============================================================
+  // ── SUBMIT ───────────────────────────────────────────────
   document.getElementById('btn-absen').addEventListener('click', function() {
-    if (isSubmitting) return; // Guard double-click
+    if (isSubmitting) return;
     var nama = document.getElementById('nama-select').value;
-    if (!inRange || !nama || isClosed || isHariLibur || deviceBlocked || !deviceId) return;
+    if (!inRange||!nama||isClosed||isHariLibur||deviceBlocked||!deviceId) return;
 
     var divisi = DIVISI_MAP[nama];
     var t      = getNow();
@@ -644,66 +509,43 @@
     var btn    = this;
     var errEl  = document.getElementById('submit-error');
 
-    // Sembunyikan error lama
     errEl.style.display = 'none';
-
-    // Set state submitting — cegah submit ganda
     isSubmitting = true;
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     btn.disabled  = true;
 
-    // ─────────────────────────────────────────────────────────
-    // PERBAIKAN UTAMA:
-    // Kirim sebagai GET dengan params agar bisa baca response.
-    // Apps Script endpoint doPost tetap ada untuk kompatibilitas,
-    // tapi kita gunakan action=absen di doGet yang melakukan
-    // validasi duplikasi SEBELUM menulis ke sheet.
-    // ─────────────────────────────────────────────────────────
+    // Kirim via GET agar response bisa dibaca (bukan no-cors)
     var params = new URLSearchParams({
-      action   : 'absen',
-      tanggal  : t.tgl,
-      jam      : t.jam,
-      nama     : nama,
-      divisi   : divisi,
-      lokasi   : NAMA_KANTOR,
-      latitude : lat,
-      longitude: lng,
-      status   : 'Masuk',
-      deviceId : deviceId
+      action:'absen', tanggal:t.tgl, jam:t.jam, nama:nama,
+      divisi:divisi, lokasi:NAMA_KANTOR,
+      latitude:lat, longitude:lng, status:'Masuk', deviceId:deviceId
     });
 
     fetch(WEBHOOK_URL + '?' + params.toString())
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.result === 'success') {
-          // ── Berhasil: tampilkan success panel ──
-          document.getElementById('form-body').style.display = 'none';
-          var sp = document.getElementById('success-panel');
-          sp.style.display = 'block';
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d.result==='success') {
+          document.getElementById('form-body').style.display='none';
+          document.getElementById('success-panel').style.display='block';
           document.getElementById('s-nama').textContent   = nama;
-          document.getElementById('s-waktu').textContent  = t.tglLong + ' · ' + t.jam;
+          document.getElementById('s-waktu').textContent  = t.tglLong+' · '+t.jam;
           document.getElementById('s-div').textContent    = divisi;
           document.getElementById('s-tgl').textContent    = t.tgl;
           document.getElementById('s-jam').textContent    = t.jam;
           document.getElementById('s-loc').textContent    = NAMA_KANTOR;
-          document.getElementById('s-coords').textContent = lat + ', ' + lng;
-
-        } else if (data.result === 'duplicate') {
-          // ── Duplikat terdeteksi server (meski lolos cek awal) ──
+          document.getElementById('s-coords').textContent = lat+', '+lng;
+        } else if (d.result==='duplicate') {
           deviceBlocked = true;
-          showBlockedPanel(deviceId, data.nama || nama);
-
+          showBlockedPanel(deviceId, d.nama||nama);
         } else {
-          // ── Error lain dari server ──
           isSubmitting = false;
           btn.innerHTML = '📋 Kirim Absensi';
           updateBtn();
-          errEl.textContent = '⚠️ ' + (data.message || 'Gagal menyimpan. Coba lagi.');
+          errEl.textContent = '⚠️ '+(d.message||'Gagal menyimpan. Coba lagi.');
           errEl.style.display = 'block';
         }
       })
-      .catch(function(err) {
-        console.warn('Fetch error:', err);
+      .catch(function(){
         isSubmitting = false;
         btn.innerHTML = '📋 Kirim Absensi';
         updateBtn();
@@ -712,9 +554,6 @@
       });
   });
 
-  // ============================================================
-  // INIT
-  // ============================================================
   fetchHariLibur();
   initDeviceFingerprint();
 </script>
