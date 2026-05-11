@@ -159,6 +159,7 @@
   .device-badge-status { font-size:10px; font-weight:600; padding:2px 8px; border-radius:100px; }
   .device-ok       { background:var(--green-light); color:#15803d; }
   .device-checking { background:var(--amber-light); color:#92400e; }
+  .device-err      { background:var(--red-light); color:#b91c1c; }
   .success-panel { padding:2rem 1.5rem; text-align:center; display:none; }
   .success-circle { width:72px; height:72px; border-radius:50%; background:var(--green-light); display:flex; align-items:center; justify-content:center; font-size:34px; margin:0 auto 1rem; animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
   .success-name { font-size:22px; font-weight:600; color:var(--gray-800); }
@@ -263,16 +264,13 @@
       <button class="btn-submit" id="btn-absen" disabled>📋 Kirim Absensi</button>
       <div class="submit-error" id="submit-error"></div>
       <div class="notice">
-        🔒&nbsp;<span>Absensi hanya bisa dilakukan pada <strong>hari kerja (Senin–Jumat)</strong> dan bukan hari libur nasional, dalam radius <strong>100 meter</strong> dari kantor, sebelum pukul <strong>18:00 WIB</strong>, dan <strong>1x per perangkat per hari</strong>.</span>
+        🔒&nbsp;<span>Absensi hanya bisa dilakukan pada <strong>hari kerja (Senin–Jumat)</strong> dan bukan hari libur nasional, dalam radius <strong>100 meter</strong> dari kantor, sebelum pukul <strong>18:00 WIB</strong>, dan <strong>1x per nama & perangkat per hari</strong>.</span>
       </div>
     </div>
     <div class="blocked-panel" id="blocked-panel">
       <div class="blocked-circle">🚫</div>
-      <div class="blocked-title">Perangkat Sudah Digunakan</div>
-      <div class="blocked-desc">
-        Perangkat ini sudah digunakan untuk absen hari ini.<br>
-        Setiap perangkat hanya dapat melakukan <strong>1x absensi per hari</strong>.
-      </div>
+      <div class="blocked-title" id="blocked-title">Sudah Absen Hari Ini</div>
+      <div class="blocked-desc" id="blocked-desc">Absensi sudah tercatat untuk hari ini.</div>
       <div class="blocked-device" id="blocked-device-id"></div>
     </div>
     <div class="success-panel" id="success-panel">
@@ -295,7 +293,7 @@
   // ============================================================
   // ⚠️  GANTI URL INI dengan URL deployment BARU dari Apps Script
   // ============================================================
-  var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwkgOVKwjUVmm4hs-gd6j5D424zVv-WnI3s7_l6KyxnqaHntgmrxrqNKWSwV8BpQCCF/exec';
+  var WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx_D818L6YVhBFDcRBETq_H3T9V0z3FBKJe4OZ_jZghV1BDmfnrK26ECB4-dsFYXxsj/exec';
 
   var OFFICE_LAT  = -6.2491795726354145;
   var OFFICE_LNG  = 106.84304641349877;
@@ -312,7 +310,9 @@
 
   var userLat = null, userLng = null;
   var inRange = false, isClosed = false, isHariLibur = false, liburLoaded = false;
-  var deviceId = null, deviceBlocked = false, isSubmitting = false;
+  var deviceId = null, deviceReady = false, deviceBlocked = false;
+  var namaBlocked = false; // FIX: tambah flag blokir nama
+  var isSubmitting = false;
   var LIBUR_MAP = {};
 
   function pad(n) { return String(n).padStart(2,'0'); }
@@ -389,7 +389,7 @@
     return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
   }
 
-  function setStatus(type, msg) {
+  function setGeoStatus(type, msg) {
     var el = document.getElementById('geo-status');
     el.className = 's-'+type+' status-bar';
     el.innerHTML = '<div class="dot"></div><span>'+msg+'</span>';
@@ -397,7 +397,9 @@
 
   function updateBtn() {
     var nama = document.getElementById('nama-select').value;
-    var ok = inRange && nama!=='' && !isClosed && !isHariLibur && !deviceBlocked && deviceId!==null && liburLoaded && !isSubmitting;
+    var ok = inRange && nama!=='' && !isClosed && !isHariLibur
+             && !deviceBlocked && !namaBlocked
+             && deviceReady && liburLoaded && !isSubmitting;
     document.getElementById('btn-absen').disabled = !ok;
   }
 
@@ -410,17 +412,17 @@
         inRange = true;
         document.getElementById('loc-name').textContent = NAMA_KANTOR;
         if (!isClosed&&!isHariLibur&&!deviceBlocked) document.getElementById('nama-select').disabled=false;
-        setStatus(isHariLibur?'warn':isClosed?'warn':'ok',
+        setGeoStatus(isHariLibur?'warn':isClosed?'warn':'ok',
           isHariLibur?'⚠ Dalam area — Hari libur':isClosed?'⚠ Dalam area — Absensi ditutup 18:00':'✓ Dalam area kantor — '+dist+'m dari titik kantor');
       } else {
         inRange = false;
         document.getElementById('loc-name').textContent = 'Di luar area kantor';
         document.getElementById('nama-select').disabled = true;
-        setStatus('err','✗ Di luar area kantor ('+dist+'m) — Absensi diblokir');
+        setGeoStatus('err','✗ Di luar area kantor ('+dist+'m) — Absensi diblokir');
       }
       updateBtn();
     }, function() {
-      setStatus('warn','⚠ Izinkan akses lokasi GPS untuk melanjutkan');
+      setGeoStatus('warn','⚠ Izinkan akses lokasi GPS untuk melanjutkan');
       document.getElementById('loc-name').textContent='Izin lokasi diperlukan';
     }, { enableHighAccuracy:true, maximumAge:5000 });
   }
@@ -432,12 +434,12 @@
       .then(function(r){
         deviceId = r.visitorId;
         showDeviceId(deviceId);
-        cekDeviceHariIni(deviceId);
+        cekStatusServer(null, deviceId); // cek device saat load
       })
       .catch(function(){
         deviceId = generateFallbackId();
         showDeviceId(deviceId);
-        cekDeviceHariIni(deviceId);
+        cekStatusServer(null, deviceId);
       });
   }
 
@@ -455,44 +457,86 @@
     return Math.abs(hash).toString(16).padStart(16,'0');
   }
 
-  function cekDeviceHariIni(devId) {
+  // ── CEK STATUS SERVER — dipanggil saat load & saat nama dipilih ──
+  // FIX UTAMA: selalu validasi ke server, jangan cuma cek di client
+  function cekStatusServer(nama, devId) {
     var t = getNow();
-    var url = WEBHOOK_URL+'?action=cekDevice&deviceId='+encodeURIComponent(devId)+'&tanggal='+encodeURIComponent(t.tgl);
-    fetch(url)
+    var params = new URLSearchParams({ action:'cekStatus', tanggal:t.tgl });
+    if (devId)  params.set('deviceId', devId);
+    if (nama)   params.set('nama', nama);
+
+    document.getElementById('device-status-badge').textContent = 'Cek...';
+    document.getElementById('device-status-badge').className   = 'device-badge-status device-checking';
+
+    fetch(WEBHOOK_URL + '?' + params.toString())
       .then(function(r){ return r.json(); })
       .then(function(d){
+        deviceReady = true;
         if (d.sudahAbsen) {
-          deviceBlocked = true;
-          showBlockedPanel(devId, d.nama);
+          if (d.blockedBy === 'device') {
+            deviceBlocked = true;
+            showBlockedPanel('device', devId, d.nama, d.message);
+          } else if (d.blockedBy === 'nama') {
+            namaBlocked = true;
+            showNamaBlocked(d.nama, d.message);
+          }
         } else {
+          deviceBlocked = false;
+          namaBlocked   = false;
           document.getElementById('device-status-badge').textContent = 'Aman ✓';
           document.getElementById('device-status-badge').className   = 'device-badge-status device-ok';
           updateBtn();
         }
       })
       .catch(function(){
-        // Jaringan down — izinkan lanjut, server akan validasi ulang saat submit
-        document.getElementById('device-status-badge').textContent = 'Cek saat kirim';
+        // Jaringan down — tetap set ready, server akan validasi saat submit
+        deviceReady = true;
+        document.getElementById('device-status-badge').textContent = 'Offline';
         document.getElementById('device-status-badge').className   = 'device-badge-status device-checking';
         updateBtn();
       });
   }
 
-  function showBlockedPanel(devId, namaYangAbsen) {
+  // Tampil blocked karena device
+  function showBlockedPanel(type, devId, namaYang, message) {
     document.getElementById('form-body').style.display    = 'none';
     document.getElementById('blocked-panel').style.display = 'block';
+    document.getElementById('blocked-title').textContent  = 'Perangkat Sudah Digunakan';
+    document.getElementById('blocked-desc').textContent   = message || 'Perangkat ini sudah digunakan absen hari ini.';
     var msg = 'Device ID: '+devId.substring(0,8)+'...'+devId.substring(devId.length-4);
-    if (namaYangAbsen) msg += '\nSudah digunakan oleh: '+namaYangAbsen;
+    if (namaYang) msg += '\nSudah digunakan oleh: '+namaYang;
     document.getElementById('blocked-device-id').textContent = msg;
-    setStatus('err','🚫 Perangkat ini sudah digunakan untuk absen hari ini');
+    setGeoStatus('err','🚫 Perangkat ini sudah digunakan untuk absen hari ini');
+    updateBtn();
   }
 
+  // Tampil blocked karena nama — FIX: tidak sembunyikan form, hanya disable
+  function showNamaBlocked(nama, message) {
+    var errEl = document.getElementById('submit-error');
+    errEl.textContent    = '🚫 ' + (message || nama + ' sudah absen hari ini.');
+    errEl.style.display  = 'block';
+    document.getElementById('device-status-badge').textContent = 'Sudah Absen';
+    document.getElementById('device-status-badge').className   = 'device-badge-status device-err';
+    updateBtn();
+  }
+
+  // ── Nama dipilih → cek ke server ────────────────────────
   document.getElementById('nama-select').addEventListener('change', function() {
-    var div = DIVISI_MAP[this.value]||'';
+    var nama = this.value;
+
+    // Reset state nama
+    namaBlocked = false;
+    document.getElementById('submit-error').style.display = 'none';
+
+    var div = DIVISI_MAP[nama]||'';
     document.getElementById('divisi-display').innerHTML = div
       ? '<strong style="color:#1e293b">'+div+'</strong>'
       : '<span class="ro-muted">Otomatis dari nama</span>';
-    document.getElementById('submit-error').style.display='none';
+
+    if (!nama) { updateBtn(); return; }
+
+    // FIX: Cek ke server setiap kali nama dipilih
+    cekStatusServer(nama, deviceId);
     updateBtn();
   });
 
@@ -500,57 +544,64 @@
   document.getElementById('btn-absen').addEventListener('click', function() {
     if (isSubmitting) return;
     var nama = document.getElementById('nama-select').value;
-    if (!inRange||!nama||isClosed||isHariLibur||deviceBlocked||!deviceId) return;
+    if (!inRange||!nama||isClosed||isHariLibur||deviceBlocked||namaBlocked||!deviceId) return;
 
-    var divisi = DIVISI_MAP[nama];
-    var t      = getNow();
-    var lat    = userLat.toFixed(6);
-    var lng    = userLng.toFixed(6);
-    var btn    = this;
-    var errEl  = document.getElementById('submit-error');
+    var t   = getNow();
+    var lat = userLat.toFixed(6);
+    var lng = userLng.toFixed(6);
+    var btn = this;
+    var errEl = document.getElementById('submit-error');
 
     errEl.style.display = 'none';
     isSubmitting = true;
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     btn.disabled  = true;
 
-    // Kirim via GET agar response bisa dibaca (bukan no-cors)
     var params = new URLSearchParams({
       action:'absen', tanggal:t.tgl, jam:t.jam, nama:nama,
-      divisi:divisi, lokasi:NAMA_KANTOR,
-      latitude:lat, longitude:lng, status:'Masuk', deviceId:deviceId
+      lokasi:NAMA_KANTOR, latitude:lat, longitude:lng,
+      status:'Masuk', deviceId:deviceId
     });
 
     fetch(WEBHOOK_URL + '?' + params.toString())
       .then(function(r){ return r.json(); })
       .then(function(d){
         if (d.result==='success') {
-          document.getElementById('form-body').style.display='none';
-          document.getElementById('success-panel').style.display='block';
+          // Tampil sukses
+          document.getElementById('form-body').style.display  = 'none';
+          document.getElementById('success-panel').style.display = 'block';
           document.getElementById('s-nama').textContent   = nama;
           document.getElementById('s-waktu').textContent  = t.tglLong+' · '+t.jam;
-          document.getElementById('s-div').textContent    = divisi;
+          document.getElementById('s-div').textContent    = DIVISI_MAP[nama]||'-';
           document.getElementById('s-tgl').textContent    = t.tgl;
           document.getElementById('s-jam').textContent    = t.jam;
           document.getElementById('s-loc').textContent    = NAMA_KANTOR;
           document.getElementById('s-coords').textContent = lat+', '+lng;
         } else if (d.result==='duplicate') {
-          deviceBlocked = true;
-          showBlockedPanel(deviceId, d.nama||nama);
+          isSubmitting = false;
+          if (d.blockedBy === 'device') {
+            deviceBlocked = true;
+            showBlockedPanel('device', deviceId, d.nama, d.message);
+          } else {
+            namaBlocked = true;
+            showNamaBlocked(d.nama||nama, d.message);
+            btn.innerHTML = '📋 Kirim Absensi';
+            updateBtn();
+          }
         } else {
           isSubmitting = false;
           btn.innerHTML = '📋 Kirim Absensi';
           updateBtn();
-          errEl.textContent = '⚠️ '+(d.message||'Gagal menyimpan. Coba lagi.');
-          errEl.style.display = 'block';
+          errEl.textContent    = '⚠️ '+(d.message||'Gagal menyimpan. Coba lagi.');
+          errEl.style.display  = 'block';
         }
       })
-      .catch(function(){
+      .catch(function(err){
         isSubmitting = false;
         btn.innerHTML = '📋 Kirim Absensi';
         updateBtn();
-        errEl.textContent = '⚠️ Gagal terhubung ke server. Periksa koneksi internet.';
-        errEl.style.display = 'block';
+        errEl.textContent    = '⚠️ Gagal terhubung ke server. Periksa koneksi internet.';
+        errEl.style.display  = 'block';
       });
   });
 
