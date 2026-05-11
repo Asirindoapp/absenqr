@@ -159,6 +159,7 @@
     margin-top: 1rem; padding: 10px 14px; background: var(--gray-50);
     border-radius: 10px; font-size: 11px; color: var(--gray-400);
     font-family: 'DM Mono', monospace; word-break: break-all;
+    white-space: pre-line;
   }
 
   .btn-submit {
@@ -178,6 +179,13 @@
 
   .notice { display:flex; gap:10px; padding:12px 14px; background:var(--blue-light); border-radius:10px; font-size:12px; color:#1e40af; margin-top:1rem; line-height:1.5; }
 
+  /* Error banner untuk submit gagal */
+  .submit-error {
+    display: none; margin-top: 0.75rem; padding: 12px 14px;
+    background: var(--red-light); border-radius: 10px;
+    font-size: 13px; color: #b91c1c; text-align: center; line-height: 1.5;
+  }
+
   .device-badge {
     display: flex; align-items: center; gap: 8px;
     padding: 8px 12px; background: var(--gray-50); border-radius: 8px;
@@ -188,6 +196,7 @@
   .device-badge-status { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
   .device-ok       { background: var(--green-light); color: #15803d; }
   .device-checking { background: var(--amber-light); color: #92400e; }
+  .device-err      { background: var(--red-light); color: #b91c1c; }
 
   /* Success */
   .success-panel { padding: 2rem 1.5rem; text-align: center; display: none; }
@@ -318,6 +327,9 @@
         📋 Kirim Absensi
       </button>
 
+      <!-- Error message saat submit gagal (misal duplikat terdeteksi server) -->
+      <div class="submit-error" id="submit-error"></div>
+
       <div class="notice">
         🔒&nbsp;
         <span>Absensi hanya bisa dilakukan pada <strong>hari kerja (Senin–Jumat)</strong> dan bukan hari libur nasional, dalam radius <strong>100 meter</strong> dari kantor, sebelum pukul <strong>18:00 WIB</strong>, dan <strong>1x per perangkat per hari</strong>.</span>
@@ -383,7 +395,8 @@
   var userLat = null, userLng = null;
   var inRange = false, isClosed = false, isHariLibur = false, liburLoaded = false;
   var deviceId = null, deviceBlocked = false;
-  var LIBUR_MAP = {}; // { 'dd/MM/yyyy': 'Nama Libur' } — diisi dari server
+  var isSubmitting = false; // ← Cegah double-click / double-submit
+  var LIBUR_MAP = {};
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -396,7 +409,7 @@
   }
 
   // ============================================================
-  // FETCH DATA LIBUR DARI SERVER (Google Calendar via Apps Script)
+  // FETCH DATA LIBUR DARI SERVER
   // ============================================================
   function fetchHariLibur() {
     var url = WEBHOOK_URL + '?action=getLibur';
@@ -409,11 +422,10 @@
         }
         liburLoaded = true;
         document.getElementById('libur-loading').style.display = 'none';
-        cekHariLibur(); // Cek setelah data siap
+        cekHariLibur();
       })
       .catch(function(err) {
-        console.warn('⚠️ Gagal ambil data libur dari server:', err);
-        // Fallback: tetap jalankan, hanya cek Sabtu/Minggu
+        console.warn('⚠️ Gagal ambil data libur:', err);
         liburLoaded = true;
         document.getElementById('libur-loading').style.display = 'none';
         cekHariLibur();
@@ -430,21 +442,17 @@
     var banner   = document.getElementById('holiday-banner');
 
     if (hari === 0 || hari === 6) {
-      // Sabtu / Minggu
       isHariLibur = true;
       banner.style.display = 'block';
       banner.innerHTML = '<strong>🏖️ Hari Libur — ' + namaHari + '</strong>' +
         'Absensi tidak dibuka pada hari ' + namaHari + '.<br>Selamat menikmati hari liburmu!';
       document.getElementById('nama-select').disabled = true;
-
     } else if (LIBUR_MAP[t.tgl]) {
-      // Libur nasional dari Google Calendar
       isHariLibur = true;
       banner.style.display = 'block';
       banner.innerHTML = '<strong>🎉 Libur Nasional</strong>' +
         LIBUR_MAP[t.tgl] + '<br>Absensi tidak dibuka pada hari libur nasional.';
       document.getElementById('nama-select').disabled = true;
-
     } else {
       isHariLibur = false;
       banner.style.display = 'none';
@@ -494,7 +502,8 @@
 
   function updateBtn() {
     var nama = document.getElementById('nama-select').value;
-    var ok   = inRange && nama !== '' && !isClosed && !isHariLibur && !deviceBlocked && deviceId !== null && liburLoaded;
+    var ok   = inRange && nama !== '' && !isClosed && !isHariLibur
+               && !deviceBlocked && deviceId !== null && liburLoaded && !isSubmitting;
     document.getElementById('btn-absen').disabled = !ok;
   }
 
@@ -548,15 +557,16 @@
         }
       })
       .catch(function() {
+        // Kalau cek gagal (jaringan down), tetap izinkan tapi server akan validasi ulang saat submit
         deviceBlocked = false;
-        document.getElementById('device-status-badge').textContent = 'Aman ✓';
-        document.getElementById('device-status-badge').className   = 'device-badge-status device-ok';
+        document.getElementById('device-status-badge').textContent = 'Cek saat kirim';
+        document.getElementById('device-status-badge').className   = 'device-badge-status device-checking';
         updateBtn();
       });
   }
 
   function showBlockedPanel(devId, namaYangAbsen) {
-    document.getElementById('form-body').style.display   = 'none';
+    document.getElementById('form-body').style.display    = 'none';
     document.getElementById('blocked-panel').style.display = 'block';
     var shortId = devId.substring(0,8) + '...' + devId.substring(devId.length-4);
     var msg = 'Device ID: ' + shortId;
@@ -614,13 +624,16 @@
     el.innerHTML = div
       ? '<strong style="color:#1e293b">' + div + '</strong>'
       : '<span class="ro-muted">Otomatis dari nama</span>';
+    // Sembunyikan error lama saat ganti nama
+    document.getElementById('submit-error').style.display = 'none';
     updateBtn();
   });
 
   // ============================================================
-  // SUBMIT
+  // SUBMIT — Sekarang menunggu konfirmasi server
   // ============================================================
   document.getElementById('btn-absen').addEventListener('click', function() {
+    if (isSubmitting) return; // Guard double-click
     var nama = document.getElementById('nama-select').value;
     if (!inRange || !nama || isClosed || isHariLibur || deviceBlocked || !deviceId) return;
 
@@ -629,34 +642,78 @@
     var lat    = userLat.toFixed(6);
     var lng    = userLng.toFixed(6);
     var btn    = this;
+    var errEl  = document.getElementById('submit-error');
 
+    // Sembunyikan error lama
+    errEl.style.display = 'none';
+
+    // Set state submitting — cegah submit ganda
+    isSubmitting = true;
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     btn.disabled  = true;
 
-    fetch(WEBHOOK_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tanggal: t.tgl, jam: t.jam, nama, divisi,
-        lokasi: NAMA_KANTOR, latitude: lat, longitude: lng,
-        status: 'Masuk', deviceId
-      })
-    }).catch(function(e) { console.warn(e); }).then(function() {
-      document.getElementById('form-body').style.display = 'none';
-      var sp = document.getElementById('success-panel');
-      sp.style.display = 'block';
-      document.getElementById('s-nama').textContent   = nama;
-      document.getElementById('s-waktu').textContent  = t.tglLong + ' · ' + t.jam;
-      document.getElementById('s-div').textContent    = divisi;
-      document.getElementById('s-tgl').textContent    = t.tgl;
-      document.getElementById('s-jam').textContent    = t.jam;
-      document.getElementById('s-loc').textContent    = NAMA_KANTOR;
-      document.getElementById('s-coords').textContent = lat + ', ' + lng;
+    // ─────────────────────────────────────────────────────────
+    // PERBAIKAN UTAMA:
+    // Kirim sebagai GET dengan params agar bisa baca response.
+    // Apps Script endpoint doPost tetap ada untuk kompatibilitas,
+    // tapi kita gunakan action=absen di doGet yang melakukan
+    // validasi duplikasi SEBELUM menulis ke sheet.
+    // ─────────────────────────────────────────────────────────
+    var params = new URLSearchParams({
+      action   : 'absen',
+      tanggal  : t.tgl,
+      jam      : t.jam,
+      nama     : nama,
+      divisi   : divisi,
+      lokasi   : NAMA_KANTOR,
+      latitude : lat,
+      longitude: lng,
+      status   : 'Masuk',
+      deviceId : deviceId
     });
+
+    fetch(WEBHOOK_URL + '?' + params.toString())
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.result === 'success') {
+          // ── Berhasil: tampilkan success panel ──
+          document.getElementById('form-body').style.display = 'none';
+          var sp = document.getElementById('success-panel');
+          sp.style.display = 'block';
+          document.getElementById('s-nama').textContent   = nama;
+          document.getElementById('s-waktu').textContent  = t.tglLong + ' · ' + t.jam;
+          document.getElementById('s-div').textContent    = divisi;
+          document.getElementById('s-tgl').textContent    = t.tgl;
+          document.getElementById('s-jam').textContent    = t.jam;
+          document.getElementById('s-loc').textContent    = NAMA_KANTOR;
+          document.getElementById('s-coords').textContent = lat + ', ' + lng;
+
+        } else if (data.result === 'duplicate') {
+          // ── Duplikat terdeteksi server (meski lolos cek awal) ──
+          deviceBlocked = true;
+          showBlockedPanel(deviceId, data.nama || nama);
+
+        } else {
+          // ── Error lain dari server ──
+          isSubmitting = false;
+          btn.innerHTML = '📋 Kirim Absensi';
+          updateBtn();
+          errEl.textContent = '⚠️ ' + (data.message || 'Gagal menyimpan. Coba lagi.');
+          errEl.style.display = 'block';
+        }
+      })
+      .catch(function(err) {
+        console.warn('Fetch error:', err);
+        isSubmitting = false;
+        btn.innerHTML = '📋 Kirim Absensi';
+        updateBtn();
+        errEl.textContent = '⚠️ Tidak dapat terhubung ke server. Periksa koneksi internet.';
+        errEl.style.display = 'block';
+      });
   });
 
   // ============================================================
-  // INIT — Urutan: fetch libur dulu, lalu fingerprint
+  // INIT
   // ============================================================
   fetchHariLibur();
   initDeviceFingerprint();
